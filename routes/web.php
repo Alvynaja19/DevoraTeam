@@ -12,8 +12,12 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 
 // Redirect root to dashboard or login
 Route::get('/', function () {
-    $books = Book::latest()->take(8)->get();
-    return view('welcome', compact('books'));
+    $books = Book::latest()->take(4)->get(); // Show 4 books in Koleksi Unggulan
+    $totalBooks = Book::sum('jumlah_buku');
+    $totalMembers = \App\Models\Member::count();
+    $activeBorrowings = \App\Models\Borrowing::where('status', 'dipinjam')->count();
+    
+    return view('welcome', compact('books', 'totalBooks', 'totalMembers', 'activeBorrowings'));
 });
 // Auth routes (guest only)
 Route::middleware('guest')->group(function () {
