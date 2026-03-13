@@ -11,7 +11,7 @@
                 <div class="sm:col-span-2">
                     <label for="book_id" class="block text-sm font-medium text-slate-700 mb-1.5">Pilih Buku <span class="text-red-500">*</span></label>
                     <select name="book_id" id="book_id" required
-                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all @error('book_id') border-red-300 @enderror">
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all @error('book_id') border-red-300 @enderror">
                         <option value="">-- Pilih Buku --</option>
                         @foreach($books as $book)
                             <option value="{{ $book->id }}" {{ old('book_id') == $book->id ? 'selected' : '' }}>
@@ -24,7 +24,7 @@
                 <div class="sm:col-span-2">
                     <label for="member_id" class="block text-sm font-medium text-slate-700 mb-1.5">Pilih Anggota <span class="text-red-500">*</span></label>
                     <select name="member_id" id="member_id" required
-                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all @error('member_id') border-red-300 @enderror">
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all @error('member_id') border-red-300 @enderror">
                         <option value="">-- Pilih Anggota --</option>
                         @foreach($members as $member)
                             <option value="{{ $member->id }}" {{ old('member_id') == $member->id ? 'selected' : '' }}>
@@ -37,13 +37,13 @@
                 <div>
                     <label for="tanggal_pinjam" class="block text-sm font-medium text-slate-700 mb-1.5">Tanggal Pinjam <span class="text-red-500">*</span></label>
                     <input type="date" name="tanggal_pinjam" id="tanggal_pinjam" value="{{ old('tanggal_pinjam', date('Y-m-d')) }}" required
-                           class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all @error('tanggal_pinjam') border-red-300 @enderror">
+                           class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all @error('tanggal_pinjam') border-red-300 @enderror">
                     @error('tanggal_pinjam') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label for="tanggal_kembali" class="block text-sm font-medium text-slate-700 mb-1.5">Batas Pengembalian <span class="text-red-500">*</span></label>
                     <input type="date" name="tanggal_kembali" id="tanggal_kembali" value="{{ old('tanggal_kembali', date('Y-m-d', strtotime('+7 days'))) }}" required
-                           class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all @error('tanggal_kembali') border-red-300 @enderror">
+                           class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all @error('tanggal_kembali') border-red-300 @enderror">
                     @error('tanggal_kembali') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>

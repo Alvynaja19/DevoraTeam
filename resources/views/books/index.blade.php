@@ -12,19 +12,19 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
                 </svg>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, pengarang, ISBN..."
-                       class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all">
+                       class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all">
             </div>
-            <select name="kategori" onchange="this.form.submit()" class="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400">
+            <select name="kategori" onchange="this.form.submit()" class="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400">
                 <option value="">Semua Kategori</option>
                 @foreach($categories as $cat)
                     <option value="{{ $cat }}" {{ request('kategori') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors">
+            <button type="submit" class="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl transition-colors">
                 Cari
             </button>
         </form>
-        <a href="{{ route('books.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl shadow-sm transition-all hover:shadow-md">
+        <a href="{{ route('books.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl shadow-sm transition-all hover:shadow-md">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
             Tambah Buku
         </a>
@@ -52,7 +52,7 @@
                         <tr class="hover:bg-slate-50/50 transition-colors">
                             <td class="px-6 py-4">
                                 <div>
-                                    <a href="{{ route('books.show', $book) }}" class="text-sm font-medium text-slate-800 hover:text-indigo-600 transition-colors">{{ $book->judul }}</a>
+                                    <a href="{{ route('books.show', $book) }}" class="text-sm font-medium text-slate-800 hover:text-green-600 transition-colors">{{ $book->judul }}</a>
                                     <p class="text-xs text-slate-500 mt-0.5">{{ $book->pengarang }} • {{ $book->tahun_terbit }}</p>
                                     @if($book->isbn)
                                         <p class="text-xs text-slate-400 mt-0.5 font-mono">ISBN: {{ $book->isbn }}</p>
@@ -61,7 +61,7 @@
                             </td>
                             <td class="px-6 py-4">
                                 @if($book->kategori)
-                                    <span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-full">{{ $book->kategori }}</span>
+                                    <span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">{{ $book->kategori }}</span>
                                 @else
                                     <span class="text-xs text-slate-400">-</span>
                                 @endif
@@ -75,7 +75,7 @@
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-end gap-1">
-                                    <a href="{{ route('books.show', $book) }}" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Detail">
+                                    <a href="{{ route('books.show', $book) }}" class="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Detail">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     </a>
                                     <a href="{{ route('books.edit', $book) }}" class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
