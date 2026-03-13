@@ -9,7 +9,7 @@
         <!-- Text Content -->
         <div class="w-full md:w-1/2 z-10">
             <div class="inline-block px-4 py-1.5 bg-white/60 backdrop-blur-sm rounded-full text-xs font-bold text-green-800 tracking-wider mb-8">
-                LITERASI UNTUK NEGERI
+                LITERASI UNTUK SMA NEGERI 4 JEMEBR
             </div>
             <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.1] mb-6 font-serif">
                 Selamat Datang di <br>
