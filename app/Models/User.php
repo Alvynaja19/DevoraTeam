@@ -25,6 +25,11 @@ class User extends Authenticatable
         'role',
     ];
 
+    public function member(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Member::class);
+    }
+
     public function borrowings(): HasMany
     {
         return $this->hasMany(\App\Models\Borrowing::class);

@@ -15,6 +15,7 @@ class Borrowing extends Model
         'tanggal_kembali',
         'tanggal_dikembalikan',
         'status',
+        'return_qr',
         'denda',
     ];
 

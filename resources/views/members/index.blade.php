@@ -27,8 +27,8 @@
                 <thead>
                     <tr class="bg-slate-50/80">
                         <th class="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3.5">Anggota</th>
-                        <th class="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3.5">NIS</th>
-                        <th class="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3.5">Kelas</th>
+                        <th class="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3.5">Status</th>
+                        <th class="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3.5">Identitas</th>
                         <th class="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3.5">Telepon</th>
                         <th class="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider px-6 py-3.5">Aksi</th>
                     </tr>
@@ -38,24 +38,45 @@
                         <tr class="hover:bg-slate-50/50 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 bg-gradient-to-br from-sky-400 to-sky-500 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                                    <div class="w-9 h-9 bg-gradient-to-br from-green-400 to-green-500 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-sm">
                                         {{ strtoupper(substr($member->nama, 0, 2)) }}
                                     </div>
                                     <div>
                                         <p class="text-sm font-medium text-slate-800">{{ $member->nama }}</p>
                                         @if($member->alamat)
-                                            <p class="text-xs text-slate-400">{{ $member->alamat }}</p>
+                                            <p class="text-[11px] text-slate-400 truncate max-w-[200px]">{{ $member->alamat }}</p>
                                         @endif
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm text-slate-600 font-mono">{{ $member->nis }}</td>
                             <td class="px-6 py-4">
-                                <span class="px-2.5 py-1 bg-sky-50 text-sky-700 text-xs font-medium rounded-full">{{ $member->kelas }}</span>
+                                @if($member->status === 'siswa')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">Siswa</span>
+                                @elseif($member->status === 'guru')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">Guru</span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">Umum</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col gap-1">
+                                    @if($member->nis)
+                                        <span class="text-xs text-slate-600 font-mono">NIS: {{ $member->nis }}</span>
+                                    @endif
+                                    @if($member->kelas)
+                                        <span class="w-fit px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded">{{ $member->kelas }}</span>
+                                    @endif
+                                    @if(!$member->nis && !$member->kelas)
+                                        <span class="text-xs text-slate-400 italic">-</span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4 text-sm text-slate-600">{{ $member->telepon ?? '-' }}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-end gap-1">
+                                    <a href="{{ route('members.show', $member) }}" class="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors" title="Detail & QR">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    </a>
                                     <a href="{{ route('members.edit', $member) }}" class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
                                     </a>

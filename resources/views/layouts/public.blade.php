@@ -38,11 +38,32 @@
                 <a href="#" class="hover:text-green-700 transition">Tentang Kami</a>
             </div>
 
-            <!-- Login Button -->
-            <div class="hidden md:block">
-                <a href="{{ route('login') }}" class="px-6 py-2.5 bg-green-200 text-green-800 font-semibold rounded-full hover:bg-green-300 transition-colors">
-                    Login
-                </a>
+            <!-- Auth Buttons -->
+            <div class="hidden md:flex items-center gap-3">
+                @auth
+                    @if(auth()->user()->role === 'admin')
+                        <a href="{{ route('dashboard') }}" class="px-5 py-2 bg-green-700 text-white font-semibold rounded-full hover:bg-green-800 transition-colors">
+                            Dashboard Admin
+                        </a>
+                    @else
+                        <a href="{{ route('member.profile') }}" class="px-5 py-2 bg-green-700 text-white font-semibold rounded-full hover:bg-green-800 transition-colors">
+                            Profil Saya
+                        </a>
+                    @endif
+                    <form method="POST" action="{{ route('logout') }}" class="inline">
+                        @csrf
+                        <button type="submit" class="px-5 py-2 bg-red-50 text-red-600 font-semibold rounded-full hover:bg-red-100 transition-colors">
+                            Logout
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="px-6 py-2 bg-green-100 text-green-800 font-semibold rounded-full hover:bg-green-200 transition-colors">
+                        Login
+                    </a>
+                    <a href="{{ route('register') }}" class="px-6 py-2 bg-green-700 text-white font-semibold rounded-full hover:bg-green-800 transition-colors shadow shadow-green-700/20">
+                        Daftar
+                    </a>
+                @endauth
             </div>
 
             <!-- Mobile Menu Button -->

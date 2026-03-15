@@ -12,7 +12,10 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('dashboard');
+            }
+            return redirect('/');
         }
         return view('auth.login');
     }
@@ -26,7 +29,12 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended(route('dashboard'));
+            
+            if (Auth::user()->role === 'admin') {
+                return redirect()->intended(route('dashboard'));
+            }
+            
+            return redirect()->intended('/');
         }
 
         return back()->withErrors([
@@ -37,7 +45,10 @@ class AuthController extends Controller
     public function showRegister()
     {
         if (Auth::check()) {
-            return redirect()->route('dashboard');
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('dashboard');
+            }
+            return redirect('/');
         }
         return view('auth.register');
     }
@@ -45,36 +56,27 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:8|confirmed',
-    ]);
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
 
-    User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'role' => 'admin',
-    ]);
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'member', // Default role untuk pendaftar baru
+        ]);
 
-    return redirect()->route('login')
-        ->with('success', 'Akun berhasil dibuat. Silakan login.');
+        \App\Models\Member::create([
+            'user_id' => $user->id,
+            'nama' => $user->name,
+            'status' => 'siswa', // Default status
+        ]);
 
-    User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'role' => 'admin',
-    ]);
-
-    // JANGAN login otomatis
-    return redirect()->route('login')
-        ->with('success', 'Akun berhasil dibuat. Silakan login.');
-        
-
-        Auth::login($user);
-
-        return redirect()->route('dashboard');
+        // JANGAN login otomatis, hanya arahkan ke form login
+        return redirect()->route('login')
+            ->with('success', 'Akun berhasil dibuat. Silakan login.');
     }
 
     public function logout(Request $request)

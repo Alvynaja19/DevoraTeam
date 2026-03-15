@@ -5,6 +5,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\ScanController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Book;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -43,10 +44,36 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
 // Protected routes
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Rute Profil khusus Member
+    Route::middleware('role:member')->group(function () {
+        Route::get('/my-profile', [\App\Http\Controllers\MemberProfileController::class, 'index'])->name('member.profile');
+    });
+    
+    // Rute yang hanya boleh diakses oleh Admin
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::resource('books', BookController::class);
-    Route::resource('members', MemberController::class)->except(['show']);
-    Route::resource('borrowings', BorrowingController::class)->only(['index', 'create', 'store']);
-    Route::patch('/borrowings/{borrowing}/return', [BorrowingController::class, 'returnBook'])->name('borrowings.return');
+        // Scan Peminjaman
+        Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
+        Route::get('/scan/member', [ScanController::class, 'lookupMember'])->name('scan.member');
+        Route::get('/scan/book', [ScanController::class, 'lookupBook'])->name('scan.book');
+        Route::post('/scan/borrow', [ScanController::class, 'borrow'])->name('scan.borrow');
+
+        // Pengembalian
+        Route::get('/return', [ScanController::class, 'returnIndex'])->name('return.index');
+        Route::get('/return/lookup', [ScanController::class, 'lookupReturnQr'])->name('return.lookup');
+        Route::post('/return/process', [ScanController::class, 'returnBook'])->name('return.process');
+
+        // Books
+        Route::post('/books/import', [BookController::class, 'import'])->name('books.import');
+        Route::resource('books', BookController::class);
+
+        // Members
+        Route::resource('members', MemberController::class);
+
+        // Borrowings
+        Route::resource('borrowings', BorrowingController::class)->only(['index', 'create', 'store']);
+        Route::patch('/borrowings/{borrowing}/return', [BorrowingController::class, 'returnBook'])->name('borrowings.return');
+    });
 });

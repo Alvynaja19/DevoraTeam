@@ -14,15 +14,35 @@
                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all @error('nama') border-red-300 @enderror">
                     @error('nama') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
+                
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Status / Kategori Anggota <span class="text-red-500">*</span></label>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="status" value="siswa" class="w-4 h-4 text-green-600 focus:ring-green-500 border-slate-300" {{ old('status', $member->status ?? 'siswa') === 'siswa' ? 'checked' : '' }}>
+                            <span class="text-sm text-slate-700 group-hover:text-slate-900 transition-colors">Siswa</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="status" value="guru" class="w-4 h-4 text-green-600 focus:ring-green-500 border-slate-300" {{ old('status', $member->status) === 'guru' ? 'checked' : '' }}>
+                            <span class="text-sm text-slate-700 group-hover:text-slate-900 transition-colors">Guru</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="status" value="masyarakat umum" class="w-4 h-4 text-green-600 focus:ring-green-500 border-slate-300" {{ old('status', $member->status) === 'masyarakat umum' ? 'checked' : '' }}>
+                            <span class="text-sm text-slate-700 group-hover:text-slate-900 transition-colors">Masyarakat Umum</span>
+                        </label>
+                    </div>
+                    @error('status') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+
                 <div>
-                    <label for="nis" class="block text-sm font-medium text-slate-700 mb-1.5">NIS <span class="text-red-500">*</span></label>
-                    <input type="text" name="nis" id="nis" value="{{ old('nis', $member->nis) }}" required
+                    <label for="nis" class="block text-sm font-medium text-slate-700 mb-1.5">NIS <span class="text-slate-400 font-normal text-xs">(Opsional)</span></label>
+                    <input type="text" name="nis" id="nis" value="{{ old('nis', $member->nis) }}"
                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all @error('nis') border-red-300 @enderror">
                     @error('nis') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label for="kelas" class="block text-sm font-medium text-slate-700 mb-1.5">Kelas <span class="text-red-500">*</span></label>
-                    <input type="text" name="kelas" id="kelas" value="{{ old('kelas', $member->kelas) }}" required
+                    <label for="kelas" class="block text-sm font-medium text-slate-700 mb-1.5">Kelas <span class="text-slate-400 font-normal text-xs">(Opsional)</span></label>
+                    <input type="text" name="kelas" id="kelas" value="{{ old('kelas', $member->kelas) }}"
                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all @error('kelas') border-red-300 @enderror">
                     @error('kelas') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
