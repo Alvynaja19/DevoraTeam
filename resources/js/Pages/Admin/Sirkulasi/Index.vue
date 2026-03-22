@@ -16,20 +16,20 @@
         </div>
         <div class="card-body">
           <div class="flex gap-2">
-            <input v-model="pinjam.qrToken" @keyup.enter="pinjamValidateMember" type="text"
-              class="form-input flex-1" placeholder="Scan QR code anggota atau ketik QR token..." />
+            <input v-model="pinjam.memberCode" @keyup.enter="pinjamValidateMember" type="text"
+              class="form-input flex-1" placeholder="Scan QR code atau ketik kode anggota..." />
             <button @click="toggleScanner('pinjam-qr')" type="button"
               :class="['btn', showScanner === 'pinjam-qr' ? 'btn-secondary' : 'btn-outline']">
               📷 {{ showScanner === 'pinjam-qr' ? 'Tutup' : 'Kamera' }}
             </button>
-            <button @click="pinjamValidateMember" :disabled="!pinjam.qrToken || pinjam.memberLoading" class="btn btn-primary">
+            <button @click="pinjamValidateMember" :disabled="!pinjam.memberCode || pinjam.memberLoading" class="btn btn-primary">
               <span v-if="pinjam.memberLoading" class="spinner"></span>
               <span v-else>Validasi</span>
             </button>
           </div>
 
           <CameraScanner type="qr" :active="showScanner === 'pinjam-qr'"
-            @scanned="v => { pinjam.qrToken = v; showScanner = ''; pinjamValidateMember() }"
+            @scanned="v => { pinjam.memberCode = v; showScanner = ''; pinjamValidateMember() }"
             @close="showScanner = ''" />
 
           <!-- Member Info -->
@@ -349,17 +349,17 @@ function toggleScanner(id) {
 
 // ── TAB 1: PEMINJAMAN ──
 const pinjam = reactive({
-  qrToken: '', barcode: '', member: null, quota: 2,
+  memberCode: '', barcode: '', member: null, quota: 2,
   memberError: '', memberLoading: false,
   bookLoading: false, bookError: '', books: [],
   loanType: 'pembaca', submitting: false,
 })
 
 async function pinjamValidateMember() {
-  if (!pinjam.qrToken) return
+  if (!pinjam.memberCode) return
   pinjam.memberLoading = true; pinjam.memberError = ''; pinjam.member = null
   try {
-    const res = await axios.post(route('loans.validate-member'), { qr_token: pinjam.qrToken })
+    const res = await axios.post(route('loans.validate-member'), { member_code: pinjam.memberCode })
     if (res.data.valid) { pinjam.member = res.data.member; pinjam.quota = res.data.quota ?? 2 }
     else { pinjam.memberError = res.data.message }
   } catch (e) { pinjam.memberError = e.response?.data?.message || 'Terjadi kesalahan.' }
@@ -383,7 +383,7 @@ async function pinjamAddBook() {
 function pinjamSubmit() {
   pinjam.submitting = true
   router.post(route('loans.store'), {
-    qr_token: pinjam.qrToken, barcodes: pinjam.books.map(b => b.barcode), loan_type: pinjam.loanType,
+    member_code: pinjam.memberCode, barcodes: pinjam.books.map(b => b.barcode), loan_type: pinjam.loanType,
   }, { onFinish: () => { pinjam.submitting = false } })
 }
 

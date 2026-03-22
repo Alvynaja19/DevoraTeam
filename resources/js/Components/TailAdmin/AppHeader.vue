@@ -16,7 +16,7 @@
 
         <!-- Mobile Logo -->
         <div class="lg:hidden font-bold text-xl tracking-tight text-indigo-600 dark:text-indigo-400">
-          DevoraV2
+          SMA NEGERI 4 JEMBER
         </div>
 
         <button

@@ -137,7 +137,7 @@
 
         <!-- ─── Tab: QR Saya ────────────────────────────── -->
         <div v-if="activeTab === 'qr'" class="profile-section qr-section">
-          <div v-if="member?.qr_token" class="qr-container">
+          <div v-if="member?.member_code" class="qr-container">
             <div class="qr-card">
               <canvas ref="qrCanvas" class="qr-canvas"></canvas>
             </div>
@@ -303,10 +303,10 @@ const qrCanvas     = ref(null)
 
 // Generate QR saat tab QR dibuka
 watch(activeTab, async (tab) => {
-  if (tab === 'qr' && props.member?.qr_token) {
+  if (tab === 'qr' && props.member?.member_code) {
     await nextTick()
     if (qrCanvas.value) {
-      await QRCode.toCanvas(qrCanvas.value, props.member.qr_token, {
+      await QRCode.toCanvas(qrCanvas.value, props.member.member_code, {
         width: 200,
         margin: 2,
         color: { dark: '#101828', light: '#ffffff' },

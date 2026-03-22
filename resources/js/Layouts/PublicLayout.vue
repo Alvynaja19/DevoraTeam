@@ -20,7 +20,7 @@
           <!-- Logo + Nav Links -->
           <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
             <Link :href="route('home')" class="flex shrink-0 items-baseline gap-1.5 no-underline">
-              <span class="font-[500] text-[1.45rem] text-[#1a1f1c] tracking-[0.01em]" style="font-family: 'Cormorant Garamond', Georgia, serif">Devora</span>
+              <span class="font-[500] text-[1.45rem] text-[#1a1f1c] tracking-[0.01em]" style="font-family: 'Cormorant Garamond', Georgia, serif">SMA NEGERI 4 JEMBER</span>
               <span class="hidden sm:inline text-[0.72rem] text-[#8a9490] tracking-[0.04em]">Perpustakaan</span>
             </Link>
 
@@ -134,7 +134,7 @@
     <footer class="site-footer">
       <div class="footer-top">
         <div class="footer-brand">
-          <div class="footer-logo">Devora</div>
+          <div class="footer-logo">SMA NEGERI 4 JEMBER</div>
           <p class="footer-brand-desc">
             Perpustakaan digital sekolah yang menghadirkan pengetahuan untuk mendukung kegiatan belajar mengajar.
           </p>
@@ -157,7 +157,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© {{ new Date().getFullYear() }} Devora. Hak cipta dilindungi.</span>
+        <span>© {{ new Date().getFullYear() }} SMA NEGERI 4 JEMBER. Hak cipta dilindungi.</span>
         <span class="footer-bottom-sub">Dibuat dengan ❤️ untuk kemajuan pendidikan</span>
       </div>
     </footer>

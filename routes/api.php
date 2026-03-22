@@ -14,8 +14,10 @@ use App\Http\Controllers\Api\VisitApiController;
 Route::prefix('v1')->group(function () {
 
     // Auth
-    Route::post('/auth/login',    [AuthApiController::class, 'login']);
-    Route::post('/auth/register', [AuthApiController::class, 'register']);
+    Route::post('/auth/login',          [AuthApiController::class, 'login']);
+    Route::post('/auth/register',       [AuthApiController::class, 'register']);
+    Route::post('/auth/claim-lookup',   [AuthApiController::class, 'claimLookup']);
+    Route::post('/auth/claim-activate', [AuthApiController::class, 'claimActivate']);
 
     // Katalog buku publik
     Route::get('/books',         [BookApiController::class, 'index']);

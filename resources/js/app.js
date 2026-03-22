@@ -7,7 +7,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
 createInertiaApp({
-    title: (title) => `${title} Devora`,
+    title: (title) => `${title} SMA NEGERI 4 JEMBER`,
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.vue`,

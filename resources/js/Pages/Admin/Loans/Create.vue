@@ -14,11 +14,11 @@
           <div class="flex gap-2">
             <input
               ref="qrInput"
-              v-model="qrToken"
+              v-model="memberCode"
               @keyup.enter="validateMember"
               type="text"
               class="form-input flex-1"
-              placeholder="Scan QR code anggota atau ketik QR token..."
+              placeholder="Scan QR code atau ketik kode anggota..."
             />
             <button @click="toggleScanner('qr')"
               :class="['btn', showQrScanner ? 'btn-secondary' : 'btn-outline']"
@@ -31,7 +31,7 @@
               </svg>
               {{ showQrScanner ? 'Tutup' : 'Kamera' }}
             </button>
-            <button @click="validateMember" :disabled="!qrToken || memberLoading" class="btn btn-primary">
+            <button @click="validateMember" :disabled="!memberCode || memberLoading" class="btn btn-primary">
               <span v-if="memberLoading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
               <span v-else>Validasi</span>
             </button>
@@ -174,7 +174,7 @@ import { router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/TailAdminLayout.vue'
 import CameraScanner from '@/Components/CameraScanner.vue'
 
-const qrToken        = ref('')
+const memberCode     = ref('')
 const barcode        = ref('')
 const member         = ref(null)
 const memberQuota    = ref(2)
@@ -202,7 +202,7 @@ function toggleScanner(type) {
 
 // QR scanned via camera
 function onQrScanned(value) {
-  qrToken.value = value
+  memberCode.value = value
   showQrScanner.value = false
   validateMember()
 }
@@ -215,13 +215,13 @@ function onBarcodeScanned(value) {
 }
 
 async function validateMember() {
-  if (!qrToken.value) return
+  if (!memberCode.value) return
   memberLoading.value = true
   memberError.value = ''
   member.value = null
 
   try {
-    const res = await axios.post(route('loans.validate-member'), { qr_token: qrToken.value })
+    const res = await axios.post(route('loans.validate-member'), { member_code: memberCode.value })
     if (res.data.valid) {
       member.value = res.data.member
       memberQuota.value = res.data.quota ?? 2
@@ -264,7 +264,7 @@ function removeBook(idx) { selectedBooks.value.splice(idx, 1) }
 function submitLoan() {
   submitting.value = true
   router.post(route('loans.store'), {
-    qr_token:  qrToken.value,
+    member_code:  memberCode.value,
     barcodes:  selectedBooks.value.map(b => b.barcode),
     loan_type: loanType.value,
   }, {

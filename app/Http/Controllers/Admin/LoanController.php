@@ -52,12 +52,12 @@ class LoanController extends Controller
         return Inertia::render('Admin/Loans/Create');
     }
 
-    // Validasi anggota via QR token (untuk scan QR)
+    // Validasi anggota via member code (untuk scan QR)
     public function validateMember(Request $request)
     {
-        $request->validate(['qr_token' => 'required|string']);
+        $request->validate(['member_code' => 'required|string']);
 
-        $member = Member::with(['user'])->where('qr_token', $request->qr_token)->first();
+        $member = Member::with(['user'])->where('member_code', $request->member_code)->first();
 
         if (!$member) {
             return response()->json(['valid' => false, 'message' => 'Anggota tidak ditemukan.'], 404);
@@ -97,17 +97,17 @@ class LoanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'qr_token'  => 'required|string',
+            'member_code'  => 'required|string',
             'barcodes'  => 'required|array|min:1|max:2',
             'barcodes.*'=> 'required|string',
             'loan_type' => 'required|in:pembaca,lomba',
         ]);
 
-        $member = Member::where('qr_token', $request->qr_token)->firstOrFail();
+        $member = Member::where('member_code', $request->member_code)->firstOrFail();
         $validation = $this->loanService->validateMember($member);
 
         if (!$validation['valid']) {
-            return back()->withErrors(['qr_token' => $validation['message']]);
+            return back()->withErrors(['member_code' => $validation['message']]);
         }
 
         $loan = $this->loanService->create($member, $request->barcodes, $request->user(), $request->loan_type);

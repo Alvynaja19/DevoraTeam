@@ -52,7 +52,7 @@
     <section class="features">
       <div class="section-header reveal">
         <span class="section-tag">Layanan Kami</span>
-        <h2 class="section-title">Kenapa Memilih <em>Devora</em></h2>
+        <h2 class="section-title">Kenapa Memilih <em>SMA NEGERI 4 JEMBER</em></h2>
         <p class="section-sub">Perpustakaan yang nyaman, modern, dan dirancang untuk mendukung kegiatan belajarmu.</p>
       </div>
       <div class="features-grid">
