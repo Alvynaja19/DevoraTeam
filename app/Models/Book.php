@@ -3,46 +3,39 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Str;
 
 class Book extends Model
 {
     protected $fillable = [
-        'judul',
-        'pengarang',
-        'penerbit',
-        'tahun_terbit',
-        'isbn',
-        'jumlah_buku',
-        'stok',
-        'kategori',
-        'cover_image',
-        'barcode',
-        'no_klasifikasi',
-        'kota',
-        'perolehan',
-        'tanggal_diterima',
+        'category_id', 'isbn', 'title', 'author', 'publisher',
+        'year', 'edition', 'language', 'pages', 'description',
+        'cover_image', 'rack_number', 'total_copies', 'avg_rating', 'total_loans',
+        'classification_number', 'city', 'acquisition_type', 'received_date', 'inventory_year'
     ];
 
     protected $casts = [
-        'tanggal_diterima' => 'date',
+        'avg_rating'   => 'decimal:2',
+        'total_copies' => 'integer',
+        'total_loans'  => 'integer',
     ];
 
-    protected static function boot(): void
-    {
-        parent::boot();
+    public function category()     { return $this->belongsTo(Category::class); }
+    public function copies()       { return $this->hasMany(BookCopy::class); }
+    public function ratings()      { return $this->hasMany(BookRating::class); }
+    public function reservations() { return $this->hasMany(Reservation::class); }
 
-        // Auto-generate barcode unik setelah buku dibuat
-        // Format: BK-0001-XXXX
-        static::created(function (Book $book) {
-            $book->barcode = 'BK-' . str_pad($book->id, 4, '0', STR_PAD_LEFT) . '-' . strtoupper(Str::random(4));
-            $book->saveQuietly();
-        });
+    public function availableCopies()
+    {
+        return $this->copies()->where('status', 'tersedia')->where('condition', '!=', 'hilang');
     }
 
-    public function borrowings(): HasMany
+    public function scopeSearch($query, string $term)
     {
-        return $this->hasMany(Borrowing::class);
+        return $query->whereFullText(['title', 'author'], $term);
+    }
+
+    public function scopePopular($query)
+    {
+        return $query->orderByDesc('total_loans')->orderByDesc('avg_rating');
     }
 }

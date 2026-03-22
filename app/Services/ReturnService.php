@@ -1,0 +1,97 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\BookCopy;
+use App\Models\Fine;
+use App\Models\Loan;
+use App\Models\LoanItem;
+use App\Models\Setting;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+
+class ReturnService
+{
+    /**
+     * Proses pengembalian eksemplar buku berdasarkan barcode.
+     * Returns ['loan_item' => LoanItem, 'fines' => Collection]
+     */
+    public function processReturn(string $barcode, string $conditionAfter, User $returnedBy): array
+    {
+        $copy = BookCopy::where('barcode', $barcode)
+            ->orWhere('copy_code', $barcode)
+            ->firstOrFail();
+
+        $loanItem = LoanItem::with('loan')
+            ->where('copy_id', $copy->id)
+            ->whereNull('returned_at')
+            ->latest()
+            ->firstOrFail();
+
+        $fines = DB::transaction(function () use ($loanItem, $copy, $conditionAfter, $returnedBy) {
+            $fines = collect();
+
+            // Tandai sebagai dikembalikan
+            $loanItem->update([
+                'returned_at'    => now(),
+                'condition_after'=> $conditionAfter,
+                'returned_by'    => $returnedBy->id,
+            ]);
+
+            // Hitung keterlambatan
+            $effectiveDue = $loanItem->loan->effectiveDueDate();
+            $daysLate     = (int) now()->startOfDay()->diffInDays($effectiveDue->startOfDay(), false) * -1;
+
+            if ($daysLate > 0) {
+                $dendaPerHari = Setting::get('denda_per_hari', 1000);
+                $fine = Fine::create([
+                    'loan_item_id' => $loanItem->id,
+                    'fine_type'    => 'keterlambatan',
+                    'days_late'    => $daysLate,
+                    'amount'       => $daysLate * $dendaPerHari,
+                    'status'       => 'belum_lunas',
+                ]);
+                $fines->push($fine);
+            }
+
+            // Hitung denda kerusakan/kehilangan
+            if (in_array($conditionAfter, ['rusak_ringan', 'rusak_berat'])) {
+                $key    = $conditionAfter === 'rusak_ringan' ? 'denda_rusak_ringan' : 'denda_rusak_berat';
+                $amount = Setting::get($key);
+                $fine = Fine::create([
+                    'loan_item_id' => $loanItem->id,
+                    'fine_type'    => 'kerusakan',
+                    'amount'       => $amount,
+                    'status'       => 'belum_lunas',
+                ]);
+                $fines->push($fine);
+                $copy->update(['condition' => $conditionAfter]);
+            }
+
+            if ($conditionAfter === 'hilang') {
+                $amount = Setting::get('denda_hilang', 50000);
+                $fine = Fine::create([
+                    'loan_item_id' => $loanItem->id,
+                    'fine_type'    => 'kehilangan',
+                    'amount'       => $amount,
+                    'status'       => 'belum_lunas',
+                ]);
+                $fines->push($fine);
+                $copy->update(['condition' => 'hilang', 'status' => 'tidak_aktif']);
+            } else {
+                $copy->update(['status' => 'tersedia']);
+            }
+
+            // Cek apakah semua item di loan ini sudah dikembalikan
+            $allReturned = $loanItem->loan->items()->whereNull('returned_at')->doesntExist();
+            if ($allReturned) {
+                $loanItem->loan->update(['status' => 'selesai']);
+            }
+
+            return $fines;
+        });
+
+        return ['loan_item' => $loanItem->fresh(), 'fines' => $fines];
+    }
+}

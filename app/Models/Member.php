@@ -3,41 +3,46 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Str;
 
 class Member extends Model
 {
     protected $fillable = [
-        'user_id',
-        'nama',
-        'status',
-        'nis',
-        'kelas',
-        'alamat',
-        'telepon',
-        'qr_code',
+        'user_id', 'class_id', 'member_code', 'qr_token', 'name',
+        'type', 'nis_nip', 'phone', 'address', 'photo', 'status',
+        'expired_at', 'verified_at', 'verified_by', 'rejection_reason',
+        'suspend_reason', 'notes',
+        // Extra fields
+        'nisn', 'nik', 'tempat_lahir', 'tanggal_lahir',
+        'agama', 'jenis_kelamin', 'pangkat_golongan',
     ];
 
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
+    protected $casts = [
+        'expired_at'    => 'date',
+        'verified_at'   => 'datetime',
+        'tanggal_lahir' => 'date',
+    ];
 
-    protected static function boot(): void
-    {
-        parent::boot();
+    // Relasi ke User
+    public function user()       { return $this->belongsTo(User::class); }
+    public function kelas()      { return $this->belongsTo(Kelas::class, 'class_id'); }
+    public function verifiedBy() { return $this->belongsTo(User::class, 'verified_by'); }
 
-        // Auto-generate QR code unik setelah anggota dibuat
-        // Format: MB-0001-XXXX
-        static::created(function (Member $member) {
-            $member->qr_code = 'MB-' . str_pad($member->id, 4, '0', STR_PAD_LEFT) . '-' . strtoupper(Str::random(4));
-            $member->saveQuietly();
-        });
-    }
+    // Relasi transaksi
+    public function loans()         { return $this->hasMany(Loan::class); }
+    public function visits()        { return $this->hasMany(Visit::class); }
+    public function reservations()  { return $this->hasMany(Reservation::class); }
+    public function bookRatings()   { return $this->hasMany(BookRating::class); }
+    public function notifications() { return $this->hasMany(MemberNotification::class); }
 
-    public function borrowings(): HasMany
-    {
-        return $this->hasMany(Borrowing::class);
-    }
+    // E-Book
+    public function ebookBookmarks()       { return $this->hasMany(EbookBookmark::class); }
+    public function ebookReadingProgress() { return $this->hasMany(EbookReadingProgress::class); }
+
+    // Helper status
+    public function isAktif(): bool    { return $this->status === 'aktif'; }
+    public function isPending(): bool  { return $this->status === 'pending'; }
+
+    // Scope
+    public function scopeAktif($query)   { return $query->where('status', 'aktif'); }
+    public function scopePending($query) { return $query->where('status', 'pending'); }
 }

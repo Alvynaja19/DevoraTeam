@@ -1,0 +1,160 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Book;
+use App\Models\Category;
+use App\Models\BookCopy;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class BookController extends Controller
+{
+    public function index(Request $request)
+    {
+        $search       = $request->search;
+        $categoryId   = $request->category_id;
+        $availability = $request->availability; // tersedia | habis
+        $sort         = $request->sort ?? 'terbaru';
+        $perPage      = $request->per_page ?? 20;
+
+        $books = Book::with('category')
+            ->withCount([
+                'copies as total_copies',
+                'copies as available_copies' => fn($q) => $q->where('status', 'tersedia'),
+                'copies as borrowed_copies'  => fn($q) => $q->where('status', 'dipinjam'),
+            ])
+            ->withAvg('ratings', 'rating')
+            ->when($search, fn($q, $s) => $q->where(fn($q2) =>
+                $q2->where('title',  'like', "%{$s}%")
+                   ->orWhere('author', 'like', "%{$s}%")
+                   ->orWhere('isbn',   'like', "%{$s}%")
+            ))
+            ->when($categoryId, fn($q, $c) => $q->where('category_id', $c))
+            ->when($availability === 'tersedia', fn($q) => $q->whereHas('copies', fn($q2) => $q2->where('status', 'tersedia')))
+            ->when($availability === 'habis',    fn($q) => $q->whereDoesntHave('copies', fn($q2) => $q2->where('status', 'tersedia')))
+            ->when($sort === 'terpopuler', fn($q) => $q->orderByDesc('total_loans'))
+            ->when($sort === 'judul',      fn($q) => $q->orderBy('title'))
+            ->when($sort !== 'terpopuler' && $sort !== 'judul', fn($q) => $q->latest())
+            ->paginate($perPage)
+            ->withQueryString();
+
+        $stats = [
+            'total_books'     => Book::count(),
+            'total_copies'    => BookCopy::count(),
+            'available'       => BookCopy::where('status', 'tersedia')->count(),
+            'borrowed'        => BookCopy::where('status', 'dipinjam')->count(),
+        ];
+
+        return Inertia::render('Admin/Books/Index', [
+            'books'      => $books,
+            'categories' => Category::orderBy('name')->get(),
+            'filters'    => $request->only(['search', 'category_id', 'availability', 'sort', 'per_page']),
+            'stats'      => $stats,
+        ]);
+    }
+
+    public function create()
+    {
+        return Inertia::render('Admin/Books/Form', [
+            'categories' => Category::orderBy('name')->get(),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'isbn'        => 'nullable|string|max:20|unique:books',
+            'title'       => 'required|string|max:255',
+            'author'      => 'required|string|max:200',
+            'publisher'   => 'nullable|string|max:150',
+            'year'        => 'nullable|digits:4',
+            'edition'     => 'nullable|string|max:20',
+            'language'    => 'nullable|string|max:30',
+            'pages'       => 'nullable|integer|min:1',
+            'description' => 'nullable|string',
+            'rack_number' => 'nullable|string|max:20',
+        ]);
+
+        $book = Book::create($data);
+        return redirect()->route('books.show', $book)->with('success', 'Buku berhasil ditambahkan.');
+    }
+
+    public function show(Book $book)
+    {
+        $book->load(['category', 'copies']);
+        return Inertia::render('Admin/Books/Show', ['book' => $book]);
+    }
+
+    // Endpoint JSON untuk modal detail di halaman Index
+    public function detail(Book $book)
+    {
+        $book->load(['category', 'copies' => fn($q) => $q->orderBy('copy_code')]);
+        return response()->json($book);
+    }
+
+    public function edit(Book $book)
+    {
+        return Inertia::render('Admin/Books/Form', [
+            'book'       => $book,
+            'categories' => Category::orderBy('name')->get(),
+        ]);
+    }
+
+    public function update(Request $request, Book $book)
+    {
+        $data = $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'isbn'        => "nullable|string|max:20|unique:books,isbn,{$book->id}",
+            'title'       => 'required|string|max:255',
+            'author'      => 'required|string|max:200',
+            'publisher'   => 'nullable|string|max:150',
+            'year'        => 'nullable|digits:4',
+            'edition'     => 'nullable|string|max:20',
+            'language'    => 'nullable|string|max:30',
+            'pages'       => 'nullable|integer|min:1',
+            'description' => 'nullable|string',
+            'rack_number' => 'nullable|string|max:20',
+        ]);
+
+        $book->update($data);
+        return redirect()->route('books.show', $book)->with('success', 'Data buku diperbarui.');
+    }
+
+    public function destroy(Book $book)
+    {
+        $book->delete();
+        return redirect()->route('books.index')->with('success', 'Buku dihapus.');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\BooksImport, $request->file('file'));
+            return back()->with('success', 'Buku berhasil diimpor beserta eksemplarnya.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengimpor buku: ' . $e->getMessage());
+        }
+    }
+
+    // Tambah eksemplar fisik
+    public function storeCopy(Request $request, Book $book)
+    {
+        $request->validate([
+            'copy_code'  => 'required|string|max:30|unique:book_copies',
+            'barcode'    => 'required|string|max:50|unique:book_copies',
+            'condition'  => 'required|in:baik,rusak_ringan,rusak_berat,hilang',
+        ]);
+
+        $book->copies()->create($request->only(['copy_code', 'barcode', 'condition']));
+        $book->increment('total_copies');
+
+        return back()->with('success', 'Eksemplar berhasil ditambahkan.');
+    }
+}
