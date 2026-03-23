@@ -49,6 +49,12 @@
           <option value="ditolak">Ditolak</option>
         </select>
 
+        <select v-model="filters.class_id" @change="applyFilter"
+          class="w-full md:w-auto px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
+          <option value="">Semua Kelas</option>
+          <option v-for="c in classes" :key="c.id" :value="c.id">{{ c.name }}</option>
+        </select>
+
         <select v-model="filters.type" @change="applyFilter"
           class="w-full md:w-auto px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
           <option value="">Semua Tipe</option>
@@ -472,9 +478,10 @@ const props = defineProps({ members: Object, filters: Object, classes: Array })
 
 // ── Filters ──
 const filters = reactive({
-  search: props.filters?.search || '',
-  status: props.filters?.status || '',
-  type:   props.filters?.type   || '',
+  search:   props.filters?.search   || '',
+  status:   props.filters?.status   || '',
+  type:     props.filters?.type     || '',
+  class_id: props.filters?.class_id || '',
 })
 const perPage = ref(props.filters?.per_page || 20)
 
