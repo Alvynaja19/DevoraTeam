@@ -48,6 +48,41 @@ class MemberController extends Controller
         return redirect()->route('members.index')->with('success', 'Anggota berhasil ditambahkan.');
     }
 
+    public function update(Request $request, Member $member)
+    {
+        $data = $request->validate([
+            'type'             => 'required|in:siswa,guru',
+            'name'             => 'required|string|max:100',
+            'nis_nip'          => 'required|string|max:30|unique:members,nis_nip,' . $member->id,
+            'class_id'         => 'required_if:type,siswa|nullable|exists:classes,id',
+            'jenis_kelamin'    => 'nullable|in:L,P',
+            'nisn'             => 'nullable|string|max:20',
+            'tempat_lahir'     => 'nullable|string|max:100',
+            'tanggal_lahir'    => 'nullable|date',
+            'nik'              => 'nullable|string|max:20',
+            'agama'            => 'nullable|string|max:30',
+            'pangkat_golongan' => 'nullable|string|max:100',
+            'address'          => 'nullable|string|max:255',
+            'phone'            => 'nullable|string|max:20',
+        ]);
+
+        $member->update($data);
+
+        return back()->with('success', "Data anggota {$member->name} berhasil diperbarui.");
+    }
+
+    public function destroy(Member $member)
+    {
+        if ($member->loans()->whereIn('status', ['aktif', 'diperpanjang', 'terlambat'])->exists()) {
+            return back()->with('error', 'Tidak dapat menghapus anggota yang masih memiliki pinjaman aktif.');
+        }
+
+        $name = $member->name;
+        $member->delete();
+
+        return back()->with('success', "Anggota {$name} berhasil dihapus.");
+    }
+
     public function import(Request $request)
     {
         $request->validate([
@@ -91,16 +126,18 @@ class MemberController extends Controller
 
     public function index(Request $request)
     {
+        $perPage = $request->get('per_page', 20);
         $members = Member::with(['user', 'kelas'])
             ->when($request->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%")
                 ->orWhere('member_code', 'like', "%{$s}%"))
             ->when($request->status, fn($q, $s) => $q->where('status', $s))
             ->when($request->type,   fn($q, $t) => $q->where('type', $t))
-            ->latest()->paginate(20)->withQueryString();
+            ->latest()->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/Members/Index', [
-            'members' => $members,
-            'filters' => $request->only(['search', 'status', 'type']),
+            'members'  => $members,
+            'filters'  => $request->only(['search', 'status', 'type', 'per_page']),
+            'classes'  => Kelas::aktif()->orderBy('name')->get(['id', 'name']),
         ]);
     }
 

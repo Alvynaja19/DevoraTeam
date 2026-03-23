@@ -4,7 +4,7 @@
       class="flex items-center text-gray-700 dark:text-gray-400 gap-3"
       @click.prevent="toggleDropdown"
     >
-      <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm bg-gradient-to-br from-indigo-500 to-purple-600">
+      <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm bg-gradient-to-br from-[#2b5a41] to-[#1c3b2b]">
         {{ userInitials }}
       </div>
 

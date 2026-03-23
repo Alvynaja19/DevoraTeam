@@ -55,13 +55,6 @@ class BookController extends Controller
         ]);
     }
 
-    public function create()
-    {
-        return Inertia::render('Admin/Books/Form', [
-            'categories' => Category::orderBy('name')->get(),
-        ]);
-    }
-
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -79,13 +72,7 @@ class BookController extends Controller
         ]);
 
         $book = Book::create($data);
-        return redirect()->route('books.show', $book)->with('success', 'Buku berhasil ditambahkan.');
-    }
-
-    public function show(Book $book)
-    {
-        $book->load(['category', 'copies']);
-        return Inertia::render('Admin/Books/Show', ['book' => $book]);
+        return redirect()->route('books.index')->with('success', 'Buku berhasil ditambahkan.');
     }
 
     // Endpoint JSON untuk modal detail di halaman Index
@@ -93,14 +80,6 @@ class BookController extends Controller
     {
         $book->load(['category', 'copies' => fn($q) => $q->orderBy('copy_code')]);
         return response()->json($book);
-    }
-
-    public function edit(Book $book)
-    {
-        return Inertia::render('Admin/Books/Form', [
-            'book'       => $book,
-            'categories' => Category::orderBy('name')->get(),
-        ]);
     }
 
     public function update(Request $request, Book $book)
@@ -120,7 +99,7 @@ class BookController extends Controller
         ]);
 
         $book->update($data);
-        return redirect()->route('books.show', $book)->with('success', 'Data buku diperbarui.');
+        return redirect()->route('books.index')->with('success', 'Data buku diperbarui.');
     }
 
     public function destroy(Book $book)
@@ -156,5 +135,18 @@ class BookController extends Controller
         $book->increment('total_copies');
 
         return back()->with('success', 'Eksemplar berhasil ditambahkan.');
+    }
+
+    // Update status / kondisi eksemplar
+    public function updateCopy(Request $request, BookCopy $copy)
+    {
+        $data = $request->validate([
+            'condition' => 'required|in:baik,rusak_ringan,rusak_berat,hilang',
+            'status'    => 'required|in:tersedia,dipinjam,tidak_aktif',
+        ]);
+
+        $copy->update($data);
+
+        return back()->with('success', 'Eksemplar berhasil diperbarui.');
     }
 }

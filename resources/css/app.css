@@ -9,19 +9,32 @@
     /* Font */
     --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
 
-    /* Brand Colors — Blue palette (renzbilliard style) */
-    --color-brand-25:  #f2f7ff;
-    --color-brand-50:  #ecf3ff;
-    --color-brand-100: #dde9ff;
-    --color-brand-200: #c2d6ff;
-    --color-brand-300: #9cb9ff;
-    --color-brand-400: #7592ff;
-    --color-brand-500: #465fff;
-    --color-brand-600: #3641f5;
-    --color-brand-700: #2a31d8;
-    --color-brand-800: #252dae;
-    --color-brand-900: #262e89;
-    --color-brand-950: #161950;
+    /* Brand Colors — Green palette */
+    --color-brand-25:  #f0fdf4;
+    --color-brand-50:  #dcfce7;
+    --color-brand-100: #bbf7d0;
+    --color-brand-200: #86efac;
+    --color-brand-300: #4ade80;
+    --color-brand-400: #2b5a41;
+    --color-brand-500: #234935;
+    --color-brand-600: #1c3b2b;
+    --color-brand-700: #152d20;
+    --color-brand-800: #0c1a12;
+    --color-brand-900: #08110c;
+    --color-brand-950: #050a08;
+
+    /* Override Tailwind's indigo config to ensure TailAdmin components turn green */
+    --color-indigo-50: #f0fdf4;
+    --color-indigo-100: #dcfce7;
+    --color-indigo-200: #bbf7d0;
+    --color-indigo-300: #86efac;
+    --color-indigo-400: #4ade80;
+    --color-indigo-500: #2b5a41;
+    --color-indigo-600: #234935;
+    --color-indigo-700: #1c3b2b;
+    --color-indigo-800: #152d20;
+    --color-indigo-900: #0c1a12;
+    --color-indigo-950: #08110c;
 
     /* Gray scale */
     --color-gray-25:  #fcfcfd;
@@ -39,8 +52,8 @@
     /* Sidebar */
     --color-sidebar-bg:     #1a2231;
     --color-sidebar-border: #222d3d;
-    --color-sidebar-text:   #94a3b8;
-    --color-sidebar-active: #465fff;
+    --color-sidebar-text:   #98a2b3;
+    --color-sidebar-active: #2b5a41;
 }
 
 /* ─── Base ──────────────────────────────────────────────────── */
@@ -115,12 +128,12 @@ body {
 }
 
 .sidebar-item.active {
-    background: rgba(70, 95, 255, 0.12);
-    color: #7592ff;
+    background: rgba(43, 90, 65, 0.12);
+    color: #4ade80;
 }
 
 .sidebar-item.active svg {
-    color: #7592ff;
+    color: #4ade80;
 }
 
 .sidebar-group-label {
@@ -188,7 +201,7 @@ body {
 }
 
 .stat-card:hover {
-    box-shadow: 0px 4px 12px rgba(70, 95, 255, 0.08);
+    box-shadow: 0px 4px 12px rgba(43, 90, 65, 0.08);
     transform: translateY(-1px);
 }
 
@@ -222,13 +235,13 @@ body {
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-primary {
-    background: #465fff;
+    background: #2b5a41;
     color: white;
-    box-shadow: 0px 1px 2px 0px rgba(70, 95, 255, 0.2);
+    box-shadow: 0px 1px 2px 0px rgba(43, 90, 65, 0.2);
 }
 .btn-primary:hover:not(:disabled) {
-    background: #3641f5;
-    box-shadow: 0px 2px 8px 0px rgba(70, 95, 255, 0.3);
+    background: #234935;
+    box-shadow: 0px 2px 8px 0px rgba(43, 90, 65, 0.3);
 }
 
 .btn-secondary {
@@ -267,7 +280,7 @@ body {
 .badge-green  { background: #ecfdf3; color: #027a48; }
 .badge-red    { background: #fef3f2; color: #b42318; }
 .badge-yellow { background: #fffaeb; color: #b54708; }
-.badge-blue   { background: #ecf3ff; color: #2a31d8; }
+.badge-blue   { background: #dcfce7; color: #166534; }
 .badge-gray   { background: #f2f4f7; color: #344054; }
 .badge-purple { background: #f4f3ff; color: #5925dc; }
 .badge-orange { background: #fff6ed; color: #c4320a; }
@@ -331,8 +344,8 @@ tbody td {
 }
 
 .form-input:focus {
-    border-color: #465fff;
-    box-shadow: 0 0 0 3px rgba(70, 95, 255, 0.12);
+    border-color: #2b5a41;
+    box-shadow: 0 0 0 3px rgba(43, 90, 65, 0.12);
 }
 
 .form-input::placeholder { color: #98a2b3; }
@@ -371,9 +384,9 @@ select.form-input { cursor: pointer; }
 }
 
 @keyframes pulse-ring {
-    0%   { box-shadow: 0 0 0 0 rgba(70, 95, 255, 0.4); }
-    70%  { box-shadow: 0 0 0 10px rgba(70, 95, 255, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(70, 95, 255, 0); }
+    0%   { box-shadow: 0 0 0 0 rgba(43, 90, 65, 0.4); }
+    70%  { box-shadow: 0 0 0 10px rgba(43, 90, 65, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(43, 90, 65, 0); }
 }
 
 .fade-in { animation: fadeIn 0.3s ease forwards; }

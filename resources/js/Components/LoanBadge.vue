@@ -7,7 +7,7 @@ const props = defineProps({ status: String })
 
 const map = {
   aktif:       { cls: 'badge-blue',   label: 'Aktif' },
-  diperpanjang:{ cls: 'badge-purple', label: 'Diperpanjang' },
+  diperpanjang:{ cls: 'badge-green', label: 'Diperpanjang' },
   terlambat:   { cls: 'badge-red',    label: 'Terlambat' },
   selesai:     { cls: 'badge-green',  label: 'Selesai' },
   hilang:      { cls: 'badge-gray',   label: 'Hilang' },

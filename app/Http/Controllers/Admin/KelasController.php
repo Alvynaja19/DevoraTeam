@@ -17,11 +17,12 @@ class KelasController extends Controller
             $query->where('name', 'like', "%{$search}%");
         }
 
-        $classes = $query->orderBy('name')->paginate(20)->withQueryString();
+        $perPage = $request->get('per_page', 10);
+        $classes = $query->orderBy('name')->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/Kelas/Index', [
             'classes' => $classes,
-            'filters' => $request->only('search'),
+            'filters' => $request->only('search', 'per_page'),
         ]);
     }
 

@@ -5,7 +5,7 @@
       <!-- Logo -->
       <div class="sidebar-logo">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#2b5a41,#1c3b2b)">
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div>
@@ -54,7 +54,7 @@
       <!-- User Info -->
       <div class="p-4 border-t" style="border-color:#1e293b">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style="background:linear-gradient(135deg,#2b5a41,#1c3b2b)">
             {{ $page.props.auth.user.name[0].toUpperCase() }}
           </div>
           <div class="flex-1 min-w-0">

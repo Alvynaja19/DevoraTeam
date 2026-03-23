@@ -6,7 +6,7 @@
       <div class="card">
         <div class="card-header">
           <div class="flex items-center gap-3">
-            <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#6366f1">1</div>
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#2b5a41">1</div>
             <div class="font-semibold text-slate-800 dark:text-white">Scan QR Anggota</div>
           </div>
         </div>
@@ -47,7 +47,7 @@
 
           <!-- Member Info -->
           <div v-if="member" class="mt-4 p-4 rounded-xl flex items-center gap-4" style="background:#f0fdf4;border:1px solid #bbf7d0">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0" style="background:linear-gradient(135deg,#2b5a41,#1c3b2b)">
               {{ member.name[0].toUpperCase() }}
             </div>
             <div class="flex-1">
@@ -66,7 +66,7 @@
       <div class="card" :class="!member ? 'opacity-50 pointer-events-none' : ''">
         <div class="card-header">
           <div class="flex items-center gap-3">
-            <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#6366f1">2</div>
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#2b5a41">2</div>
             <div class="font-semibold text-slate-800 dark:text-white">Scan Barcode Buku (maks. {{ memberQuota }} buku)</div>
           </div>
         </div>
@@ -108,7 +108,7 @@
           <div v-if="selectedBooks.length > 0" class="space-y-2">
             <div v-for="(bk, i) in selectedBooks" :key="i" class="flex items-center gap-3 p-3 rounded-xl" style="background:#f8fafc;border:1px solid #e2e8f0">
               <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:#eef2ff">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" stroke="#6366f1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" stroke="#2b5a41" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </div>
               <div class="flex-1">
                 <div class="text-sm font-semibold text-slate-800">{{ bk.book?.title }}</div>
@@ -129,7 +129,7 @@
       <div class="card" :class="selectedBooks.length === 0 ? 'opacity-50 pointer-events-none' : ''">
         <div class="card-header">
           <div class="flex items-center gap-3">
-            <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#6366f1">3</div>
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#2b5a41">3</div>
             <div class="font-semibold text-slate-800 dark:text-white">Konfirmasi Peminjaman</div>
           </div>
         </div>

@@ -7,10 +7,10 @@
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
           Import Excel
         </button>
-        <Link :href="route('books.create')" class="btn btn-primary">
+        <button @click="openBookForm()" class="btn btn-primary">
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           Tambah Buku
-        </Link>
+        </button>
       </div>
     </template>
 
@@ -18,7 +18,7 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <div class="card p-4 flex items-center gap-4">
         <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#6366f1" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#2b5a41" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
         </div>
         <div>
           <div class="text-xs text-slate-500 uppercase tracking-wide font-medium">Judul Buku</div>
@@ -54,198 +54,158 @@
       </div>
     </div>
 
-    <!-- Filter + Search Bar (1 baris) -->
-    <div class="card px-4 py-3 mb-4">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mr-1 shrink-0">Filter</span>
+    <div class="space-y-4 md:space-y-6">
 
-        <select v-model="filters.category_id" @change="applyFilter" class="form-input py-1.5 px-3 text-sm w-auto min-w-[140px] max-w-[180px] shrink-0">
-          <option value="">Semua Kategori</option>
-          <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-        </select>
+      <!-- Rows per page, Filters & Search (separate card) -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <!-- Left: Rows per page -->
+        <div class="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
+          <span>Tampilkan</span>
+          <select v-model="filters.per_page" @change="applyFilter"
+            class="px-3 py-1.5 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span>baris</span>
+        </div>
 
-        <select v-model="filters.availability" @change="applyFilter" class="form-input py-1.5 px-3 text-sm w-auto min-w-[150px] max-w-[180px] shrink-0">
-          <option value="">Ketersediaan: Semua</option>
-          <option value="tersedia">Tersedia</option>
-          <option value="habis">Habis</option>
-        </select>
+        <!-- Right: Filters & Search -->
+        <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+          <select v-model="filters.category_id" @change="applyFilter"
+            class="w-full md:w-auto px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
+            <option value="">Semua Kategori</option>
+            <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+          </select>
 
-        <!-- Divider -->
-        <div class="h-5 w-px bg-slate-200 dark:bg-slate-700 shrink-0 mx-1"></div>
+          <select v-model="filters.availability" @change="applyFilter"
+            class="w-full md:w-auto px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
+            <option value="">Status: Semua</option>
+            <option value="tersedia">Tersedia</option>
+            <option value="habis">Habis</option>
+          </select>
 
-        <select v-model="filters.sort" @change="applyFilter" class="form-input py-1.5 px-3 text-sm w-auto min-w-[140px] max-w-[180px] shrink-0">
-          <option value="terbaru">Urutkan: Terbaru</option>
-          <option value="terpopuler">Urutkan: Terpopuler</option>
-          <option value="judul">Urutkan: Judul A-Z</option>
-        </select>
+          <select v-model="filters.availability" @change="applyFilter"
+            class="w-full md:w-auto px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
+            <option value="" selected>Urutkan: Terbaru</option>
+            <option value="terpopuler">Terpopuler</option>
+            <option value="judul">Judul A-Z</option>
+          </select>
 
-        <!-- Search memakan sisa ruang -->
-        <div class="relative flex-1 min-w-0 ml-1">
-          <input v-model="filters.search" @keyup.enter="applyFilter"
-                 type="text" placeholder="🔍 Cari judul, pengarang, ISBN..."
-                 class="form-input px-3 py-1.5 text-sm w-full outline-none focus:ring-1 focus:ring-indigo-500" />
+          <div class="relative w-full md:w-96">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input v-model="filters.search" type="text"
+              placeholder="Cari judul, ISBN..."
+              class="w-full pl-10 pr-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" />
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Table -->
-    <div class="card overflow-hidden" v-if="books.data.length > 0">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-slate-50 text-slate-500 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider dark:bg-slate-700/50 dark:text-slate-300 dark:border-slate-700">
-              <th class="py-3 px-4 font-medium w-12 text-center">No</th>
-              <th class="py-3 px-4 font-medium w-16">Cover</th>
-              <th class="py-3 px-4 font-medium">Buku</th>
-              <th class="py-3 px-4 font-medium">Kategori</th>
-              <th class="py-3 px-4 font-medium text-center">Stok</th>
-              <th class="py-3 px-4 font-medium text-center w-28">Rating</th>
-              <th class="py-3 px-4 font-medium text-center w-24">Pinjam</th>
-              <th class="py-3 px-4 font-medium text-center w-36">Aksi</th>
+      <!-- Table (separate card) -->
+      <div class="overflow-x-auto bg-white border border-gray-200 rounded-xl shadow-sm">
+        <table class="w-full min-w-[900px]">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">No</th>
+              <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Cover</th>
+              <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Buku</th>
+              <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Kategori</th>
+              <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Stok</th>
+              <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Rating</th>
+              <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Pinjam</th>
+              <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Aksi</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
-            <tr v-for="(book, index) in books.data" :key="book.id" class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-
-              <!-- No -->
-              <td class="py-3 px-4 text-center text-sm font-medium text-slate-500 dark:text-slate-400">
-                {{ books.from + index }}
-              </td>
-
-              <!-- Cover -->
-              <td class="py-3 px-4">
-                <div class="w-11 h-14 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center shadow-sm"
+          <tbody class="divide-y divide-gray-200">
+            <tr v-if="books.data && books.data.length > 0" v-for="(book, index) in books.data" :key="book.id" class="hover:bg-gray-50 transition-colors">
+              <td class="px-3 md:px-6 py-3 md:py-4 text-sm font-medium text-gray-900">{{ books.from + index }}</td>
+              <td class="px-3 md:px-6 py-3 md:py-4">
+                <div class="w-10 h-14 rounded overflow-hidden flex-shrink-0 flex items-center justify-center shadow-sm"
                      :style="`background: linear-gradient(135deg, ${coverGradient(book.category_id)})`">
                   <svg width="18" height="18" fill="none" viewBox="0 0 24 24" class="opacity-50">
                     <path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
                 </div>
               </td>
-
-              <!-- Judul + Penulis -->
-              <td class="py-3 px-4">
-                <div class="font-semibold text-slate-800 dark:text-slate-100 line-clamp-1" :title="book.title">{{ book.title }}</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ book.author }}</div>
-                <div class="text-[11px] text-slate-400 mt-0.5" v-if="book.publisher">
+              <td class="px-3 md:px-6 py-3 md:py-4">
+                <div class="font-semibold text-gray-900 line-clamp-1" :title="book.title">{{ book.title }}</div>
+                <div class="text-xs text-gray-500 mt-0.5">{{ book.author }}</div>
+                <div class="text-[11px] text-gray-400 mt-0.5" v-if="book.publisher">
                   {{ book.publisher }} <span v-if="book.year">({{ book.year }})</span>
                 </div>
               </td>
-
-              <!-- Kategori -->
-              <td class="py-3 px-4">
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wide"
-                      :style="`background:${categoryBg(book.category?.name)}20; color:${categoryBg(book.category?.name)}`">
+              <td class="px-3 md:px-6 py-3 md:py-4">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                      :style="`background:${categoryBg(book.category?.name)}15; color:${categoryBg(book.category?.name)}; border: 1px solid ${categoryBg(book.category?.name)}30;`">
                   {{ book.category?.name || '-' }}
                 </span>
-                <!-- <div v-if="book.classification_number" class="text-[11px] text-slate-400 mt-1">{{ book.classification_number }}</div> -->
               </td>
-
-              <!-- Stok -->
-              <td class="py-3 px-4 text-center">
-                <span class="text-sm font-bold" :class="book.available_copies > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'">
-                  {{ book.available_copies }}
-                </span>
-                <!-- <div class="text-[11px] text-slate-400 leading-tight">tersedia</div>
-                <div class="text-[11px] text-slate-400 leading-tight">dari {{ book.total_copies }} total</div> -->
+              <td class="px-3 md:px-6 py-3 md:py-4 text-sm font-bold" :class="book.available_copies > 0 ? 'text-emerald-600' : 'text-red-500'">
+                {{ book.available_copies }}
               </td>
-
-              <!-- Rating: 5 bintang -->
-              <td class="py-3 px-4 text-center">
-                <div class="flex items-center gap-1 justify-center">
-                  <template v-for="n in 5" :key="n">
-                    <svg width="12" height="12" viewBox="0 0 20 20"
-                         :fill="n <= Math.round(book.ratings_avg_rating || 0) ? '#f59e0b' : '#e2e8f0'">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292Z"/>
-                    </svg>
-                  </template>
-                  <span class="text-xs text-slate-500 ml-1">{{ book.ratings_avg_rating ? Number(book.ratings_avg_rating).toFixed(1) : '—' }}</span>
+              <td class="px-3 md:px-6 py-3 md:py-4">
+                <div class="flex items-center">
+                  <svg width="14" height="14" viewBox="0 0 20 20" fill="#f59e0b">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292Z"/>
+                  </svg>
+                  <span class="text-sm font-semibold text-gray-700 ml-1.5">{{ book.ratings_avg_rating ? Number(book.ratings_avg_rating).toFixed(1) : '—' }}</span>
                 </div>
               </td>
-
-              <!-- Total Dipinjam -->
-              <td class="py-3 px-4 text-center">
-                <div class="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  {{ book.total_loans ? Number(book.total_loans).toLocaleString() : '0' }}
-                </div>
-                <div class="text-[11px] text-slate-400">x dipinjam</div>
+              <td class="px-3 md:px-6 py-3 md:py-4 text-sm font-semibold text-gray-700">
+                {{ book.total_loans ? Number(book.total_loans).toLocaleString() : '0' }}
               </td>
-
-      <!-- Aksi: ikon dengan border -->
-              <td class="py-3 px-4 text-center">
-                <div class="flex items-center justify-center gap-1.5">
-                  <button @click="openDetail(book)"
-                          class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50 dark:border-slate-700 dark:hover:border-indigo-500 transition-colors"
-                          title="Lihat Detail">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
-                  </button>
-                  <Link :href="route('books.edit', book.id)"
-                        class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:border-amber-300 hover:text-amber-600 hover:bg-amber-50 dark:border-slate-700 dark:hover:border-amber-500 transition-colors"
-                        title="Edit Buku">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
-                  </Link>
-                  <button @click="confirmDelete(book)"
-                          class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:border-rose-300 hover:text-rose-600 hover:bg-rose-50 dark:border-slate-700 dark:hover:border-rose-500 transition-colors"
-                          title="Hapus Buku">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
-                  </button>
+              <td class="px-3 md:px-6 py-3 md:py-4">
+                <div class="flex gap-2">
+                  <button @click="openDetail(book)" class="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium">Detail</button>
+                  <button @click="openBookForm(book)" class="px-3 py-1 text-sm text-emerald-600 hover:text-emerald-700 font-medium">Edit</button>
+                  <button @click="confirmDelete(book)" class="px-3 py-1 text-sm text-red-600 hover:text-red-700 font-medium">Hapus</button>
                 </div>
+              </td>
+            </tr>
+            <!-- Empty state -->
+            <tr v-if="!books.data || books.data.length === 0">
+              <td colspan="8" class="px-6 py-16 text-center">
+                <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="mx-auto mb-3 text-gray-300"><path stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
+                <div class="text-gray-500 font-medium">Belum ada buku ditemukan</div>
+                <p class="text-sm text-gray-400 mt-1">Coba ubah filter atau kata kunci pencarian</p>
+                <Link :href="route('books.create')" class="inline-block mt-4 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg text-sm transition">Tambah Buku Pertama</Link>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Footer Table (Info & Pagination) -->
-      <div class="px-4 py-3 border-t border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <!-- Info & Per Page -->
-        <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-          <div class="flex items-center gap-2">
-            <span>Tampilkan</span>
-            <select v-model="filters.per_page" @change="applyFilter" class="form-input py-1 px-2 text-sm w-16">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-            <span>baris</span>
-          </div>
-          <span v-if="books.total > 0">
-            Menampilkan <strong class="text-slate-800 dark:text-slate-200">{{ books.from }}–{{ books.to }}</strong> dari <strong class="text-slate-800 dark:text-slate-200">{{ books.total.toLocaleString() }}</strong> buku
-          </span>
+      <!-- Pagination (standalone, outside table card) -->
+      <div v-if="books.data && books.data.length > 0" class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-sm text-gray-500">
+          Menampilkan <span class="font-semibold text-gray-800">{{ books.from }}</span> sampai <span class="font-semibold text-gray-800">{{ books.to }}</span> dari <span class="font-semibold text-gray-800">{{ books.total.toLocaleString() }}</span> buku
         </div>
-
-        <!-- Pagination Links -->
-        <div v-if="books.last_page > 1" class="flex items-center gap-1">
+        <div v-if="books.last_page > 1" class="flex items-center gap-1.5">
           <Link v-if="books.prev_page_url" :href="books.prev_page_url"
-                class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 text-slate-500 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-700 text-sm">
+            class="w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-white border text-gray-600 border-gray-300 hover:bg-gray-50 hover:text-gray-800">
             ‹
           </Link>
           <template v-for="page in paginationPages" :key="page">
-            <span v-if="page === '...'" class="w-7 h-7 flex items-center justify-center text-slate-400 text-sm">…</span>
+            <span v-if="page === '...'" class="w-9 h-9 flex items-center justify-center text-gray-400 text-sm">…</span>
             <Link v-else :href="`${books.path}?page=${page}&${queryString}`"
-                  class="w-7 h-7 flex items-center justify-center rounded text-sm font-medium transition-colors"
-                  :class="page === books.current_page
-                    ? 'bg-indigo-600 text-white'
-                    : 'border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300'">
+              class="w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors border"
+              :class="page === books.current_page
+                ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
+                : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50 hover:text-gray-800'">
               {{ page }}
             </Link>
           </template>
           <Link v-if="books.next_page_url" :href="books.next_page_url"
-                class="w-7 h-7 flex items-center justify-center rounded border border-slate-200 text-slate-500 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-700 text-sm">
+            class="w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-white border text-gray-600 border-gray-300 hover:bg-gray-50 hover:text-gray-800">
             ›
           </Link>
         </div>
       </div>
-    </div>
-
-    <!-- Empty State -->
-    <div v-if="books.data.length === 0" class="card py-16 text-center">
-      <svg width="48" height="48" fill="none" viewBox="0 0 24 24" class="mx-auto mb-4 text-slate-300 dark:text-slate-600">
-        <path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <div class="text-slate-500 dark:text-slate-400 font-medium">Belum ada buku ditemukan</div>
-      <p class="text-sm text-slate-400 mt-1">Coba ubah filter atau kata kunci pencarian</p>
-      <Link :href="route('books.create')" class="btn btn-primary mt-6">Tambah Buku Pertama</Link>
     </div>
 
     <!-- Import Modal -->
@@ -384,7 +344,8 @@
                     <th class="py-2.5 px-4 font-medium"># Kode</th>
                     <th class="py-2.5 px-4 font-medium">Barcode</th>
                     <th class="py-2.5 px-4 font-medium">Kondisi</th>
-                    <th class="py-2.5 px-4 font-medium text-right">Status</th>
+                    <th class="py-2.5 px-4 font-medium">Status</th>
+                    <th class="py-2.5 px-4 font-medium text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
@@ -395,17 +356,40 @@
                         <svg class="modal-barcode-svg" :data-barcode="copy.barcode" style="max-height:42px; width:auto;"></svg>
                       </div>
                     </td>
+                    <!-- Kondisi: editable -->
                     <td class="py-2.5 px-4">
-                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                            :class="copy.condition === 'baik' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'">
+                      <select v-if="editingCopyId === copy.id" v-model="copyEditForm.condition"
+                        class="px-2 py-1 text-xs rounded border border-gray-300 bg-white text-gray-900 focus:ring-1 focus:ring-emerald-500">
+                        <option value="baik">baik</option>
+                        <option value="rusak_ringan">rusak_ringan</option>
+                        <option value="rusak_berat">rusak_berat</option>
+                        <option value="hilang">hilang</option>
+                      </select>
+                      <span v-else class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                            :class="copy.condition === 'baik' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'">
                         {{ copy.condition }}
                       </span>
                     </td>
-                    <td class="py-2.5 px-4 text-right">
-                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
-                            :class="copy.status === 'tersedia' ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400' : 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'">
+                    <!-- Status: editable -->
+                    <td class="py-2.5 px-4">
+                      <select v-if="editingCopyId === copy.id" v-model="copyEditForm.status"
+                        class="px-2 py-1 text-xs rounded border border-gray-300 bg-white text-gray-900 focus:ring-1 focus:ring-emerald-500">
+                        <option value="tersedia">tersedia</option>
+                        <option value="dipinjam">dipinjam</option>
+                        <option value="tidak_aktif">tidak_aktif</option>
+                      </select>
+                      <span v-else class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                            :class="{ 'bg-indigo-50 text-indigo-700': copy.status === 'tersedia', 'bg-amber-50 text-amber-700': copy.status === 'dipinjam', 'bg-red-50 text-red-700': copy.status === 'tidak_aktif' }">
                         {{ copy.status }}
                       </span>
+                    </td>
+                    <!-- Aksi -->
+                    <td class="py-2.5 px-4 text-right">
+                      <div v-if="editingCopyId === copy.id" class="flex items-center justify-end gap-2">
+                        <button @click="saveCopyEdit(copy)" class="text-emerald-600 hover:text-emerald-700 text-xs font-semibold">Simpan</button>
+                        <button @click="editingCopyId = null" class="text-gray-400 hover:text-gray-600 text-xs font-semibold">Batal</button>
+                      </div>
+                      <button v-else @click="startCopyEdit(copy)" class="text-blue-500 hover:text-blue-700 text-xs font-semibold">Edit</button>
                     </td>
                   </tr>
                 </tbody>
@@ -418,17 +402,127 @@
           </div>
         </div>
 
+        <!-- Tambah Eksemplar Section -->
+        <div class="px-6 pb-4">
+          <button v-if="!showAddCopyForm" @click="initAddCopy()" class="w-full py-2 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-emerald-400 hover:text-emerald-600 transition font-medium">
+            + Tambah Eksemplar
+          </button>
+          <div v-else class="p-4 border border-gray-200 rounded-xl bg-gray-50 space-y-3">
+            <h4 class="text-sm font-bold text-gray-700">Tambah Eksemplar Baru</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Kode Eksemplar</label>
+                <input type="text" v-model="addCopyForm.copy_code" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" placeholder="BK-0001-C1" />
+                <div v-if="addCopyForm.errors.copy_code" class="text-xs text-red-500 mt-1">{{ addCopyForm.errors.copy_code }}</div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Barcode</label>
+                <input type="text" v-model="addCopyForm.barcode" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" placeholder="BC58009..." />
+                <div v-if="addCopyForm.errors.barcode" class="text-xs text-red-500 mt-1">{{ addCopyForm.errors.barcode }}</div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Kondisi</label>
+                <select v-model="addCopyForm.condition" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                  <option value="baik">Baik</option>
+                  <option value="rusak_ringan">Rusak Ringan</option>
+                  <option value="rusak_berat">Rusak Berat</option>
+                </select>
+              </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+              <button @click="showAddCopyForm = false" class="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg text-sm transition">Batal</button>
+              <button @click="submitAddCopy()" :disabled="addCopyForm.processing" class="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg text-sm transition disabled:opacity-50">
+                {{ addCopyForm.processing ? 'Menyimpan...' : 'Simpan' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Footer -->
         <div class="px-6 pb-6 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-700 pt-4">
           <button @click="closeDetail" class="btn btn-secondary">Tutup</button>
-          <Link :href="route('books.edit', viewBook.id)" class="btn btn-secondary">
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Z" /></svg>
-            Edit Buku
-          </Link>
         </div>
       </div>
     </div>
     </Transition>
+
+    <!-- Create / Edit Book Modal -->
+    <div v-if="bookFormModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" @click.self="bookFormModal = false">
+      <div class="w-full max-w-2xl bg-white rounded-2xl border border-gray-200 flex flex-col max-h-[90vh]">
+        <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold bg-gradient-to-br from-emerald-500 to-emerald-600">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" /></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900">{{ editingBook ? 'Edit Buku' : 'Tambah Buku Baru' }}</h3>
+          </div>
+          <button @click="bookFormModal = false" class="text-gray-400 hover:text-gray-600">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <form @submit.prevent="submitBookForm" class="px-6 py-5 overflow-y-auto space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Judul Buku <span class="text-red-500">*</span></label>
+              <input type="text" v-model="bookForm.title" required class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" />
+              <div v-if="bookForm.errors.title" class="text-xs text-red-500 mt-1">{{ bookForm.errors.title }}</div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Penulis <span class="text-red-500">*</span></label>
+              <input type="text" v-model="bookForm.author" required class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" />
+              <div v-if="bookForm.errors.author" class="text-xs text-red-500 mt-1">{{ bookForm.errors.author }}</div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Kategori <span class="text-red-500">*</span></label>
+              <select v-model="bookForm.category_id" required class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
+                <option value="">Pilih Kategori...</option>
+                <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+              </select>
+              <div v-if="bookForm.errors.category_id" class="text-xs text-red-500 mt-1">{{ bookForm.errors.category_id }}</div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">ISBN</label>
+              <input type="text" v-model="bookForm.isbn" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" />
+              <div v-if="bookForm.errors.isbn" class="text-xs text-red-500 mt-1">{{ bookForm.errors.isbn }}</div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Penerbit</label>
+              <input type="text" v-model="bookForm.publisher" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">No Klasifikasi</label>
+              <input type="text" v-model="bookForm.classification_number" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Kota Penerbit</label>
+              <input type="text" v-model="bookForm.city" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Terbit</label>
+              <input type="text" v-model="bookForm.year" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Perolehan</label>
+              <input type="text" v-model="bookForm.acquisition_type" placeholder="Misal: Beli, Sumbangan" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Inventaris</label>
+              <input type="text" v-model="bookForm.inventory_year" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi / Sinopsis</label>
+            <textarea v-model="bookForm.description" rows="3" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500" placeholder="Tambahkan informasi rinci tentang buku ini..."></textarea>
+          </div>
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <button type="button" @click="bookFormModal = false" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg text-sm transition">Batal</button>
+            <button type="submit" :disabled="bookForm.processing" class="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg text-sm transition disabled:opacity-50">
+              {{ bookForm.processing ? 'Menyimpan...' : (editingBook ? 'Simpan Perubahan' : 'Tambah Buku') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </AdminLayout>
 </template>
 
@@ -450,13 +544,19 @@ const filters = reactive({
   search:       props.filters?.search       || '',
   category_id:  props.filters?.category_id  || '',
   availability: props.filters?.availability || '',
-  sort:         props.filters?.sort         || 'terbaru',
+  sort:         props.filters?.sort         || '',
   per_page:     props.filters?.per_page     || '20',
 })
 
 function applyFilter() {
   router.get(route('books.index'), filters, { preserveState: true, replace: true })
 }
+
+let searchTimer = null
+watch(() => filters.search, () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => applyFilter(), 400)
+})
 
 const queryString = computed(() => {
   const p = new URLSearchParams()
@@ -484,8 +584,8 @@ const paginationPages = computed(() => {
 
 // ── Cover colors ──────────────────────────────────────────
 const gradients = [
-  ['#6366f1', '#8b5cf6'],
-  ['#0ea5e9', '#6366f1'],
+  ['#2b5a41', '#1c3b2b'],
+  ['#0ea5e9', '#2b5a41'],
   ['#10b981', '#059669'],
   ['#f59e0b', '#ef4444'],
   ['#ec4899', '#8b5cf6'],
@@ -499,14 +599,14 @@ function coverGradient(id) {
 
 const categoryColors = {
   'fiksi':     '#10b981',
-  'non fiksi': '#6366f1',
+  'non fiksi': '#2b5a41',
   'sastra':    '#8b5cf6',
   'sejarah':   '#f59e0b',
   'sains':     '#0ea5e9',
 }
 function categoryBg(name) {
   if (!name) return '#94a3b8'
-  return categoryColors[name.toLowerCase()] || '#6366f1'
+  return categoryColors[name.toLowerCase()] || '#2b5a41'
 }
 
 // ── Import ────────────────────────────────────────────────
@@ -516,6 +616,100 @@ const importForm = useForm({ file: null })
 function submitImport() {
   importForm.post(route('books.import'), {
     onSuccess: () => { isImportModalOpen.value = false; importForm.reset() },
+  })
+}
+
+// ── Create / Edit Book Modal ──────────────────────────────
+const bookFormModal = ref(false)
+const editingBook = ref(null)
+const bookForm = useForm({
+  title: '', author: '', category_id: '', isbn: '',
+  publisher: '', classification_number: '', city: '',
+  year: '', acquisition_type: '', inventory_year: '', description: ''
+})
+
+function openBookForm(book = null) {
+  editingBook.value = book
+  if (book) {
+    bookForm.title = book.title || ''
+    bookForm.author = book.author || ''
+    bookForm.category_id = book.category_id || ''
+    bookForm.isbn = book.isbn || ''
+    bookForm.publisher = book.publisher || ''
+    bookForm.classification_number = book.classification_number || ''
+    bookForm.city = book.city || ''
+    bookForm.year = book.year || ''
+    bookForm.acquisition_type = book.acquisition_type || ''
+    bookForm.inventory_year = book.inventory_year || ''
+    bookForm.description = book.description || ''
+  } else {
+    bookForm.reset()
+  }
+  bookForm.clearErrors()
+  bookFormModal.value = true
+}
+
+function submitBookForm() {
+  if (editingBook.value) {
+    bookForm.put(route('books.update', editingBook.value.id), {
+      onSuccess: () => { bookFormModal.value = false; bookForm.reset() },
+    })
+  } else {
+    bookForm.post(route('books.store'), {
+      onSuccess: () => { bookFormModal.value = false; bookForm.reset() },
+    })
+  }
+}
+
+// ── Add Copy Form ─────────────────────────────────────────
+const showAddCopyForm = ref(false)
+const addCopyForm = useForm({ copy_code: '', barcode: '', condition: 'baik' })
+
+function initAddCopy() {
+  const bookCode = viewBook.value?.book_code || `BK-${String(viewBook.value?.id).padStart(4, '0')}`
+  const nextIdx = (viewBookCopies.value?.length || 0) + 1
+  addCopyForm.copy_code = `${bookCode}-C${nextIdx}`
+  addCopyForm.barcode = `BCS${Date.now()}`
+  addCopyForm.condition = 'baik'
+  addCopyForm.clearErrors()
+  showAddCopyForm.value = true
+}
+
+function submitAddCopy() {
+  addCopyForm.post(route('books.copies.store', viewBook.value.id), {
+    preserveState: true,
+    onSuccess: async () => {
+      showAddCopyForm.value = false
+      addCopyForm.reset()
+      // refresh copies list
+      const res = await fetch(route('books.detail', viewBook.value.id))
+      const data = await res.json()
+      viewBookCopies.value = data.copies || []
+    },
+  })
+}
+
+// ── Inline Copy Edit ──────────────────────────────────────
+const editingCopyId = ref(null)
+const copyEditForm = reactive({ condition: '', status: '' })
+
+function startCopyEdit(copy) {
+  editingCopyId.value = copy.id
+  copyEditForm.condition = copy.condition
+  copyEditForm.status = copy.status
+}
+
+function saveCopyEdit(copy) {
+  router.put(route('copies.update', copy.id), {
+    condition: copyEditForm.condition,
+    status: copyEditForm.status,
+  }, {
+    preserveState: true,
+    onSuccess: () => {
+      copy.condition = copyEditForm.condition
+      copy.status = copyEditForm.status
+      editingCopyId.value = null
+    },
   })
 }
 

@@ -61,12 +61,15 @@ Route::middleware('auth')->group(function () {
             Route::post('/members/{member}/reject', [MemberController::class , 'reject'])->name('members.reject');
             Route::post('/members/{member}/suspend', [MemberController::class , 'suspend'])->name('members.suspend');
             Route::post('/members/{member}/activate', [MemberController::class , 'activate'])->name('members.activate');
+            Route::put('/members/{member}', [MemberController::class , 'update'])->name('members.update');
+            Route::delete('/members/{member}', [MemberController::class , 'destroy'])->name('members.destroy');
 
             // Books
             Route::post('/books/import', [BookController::class , 'import'])->name('books.import');
             Route::get('/books/{book}/detail', [BookController::class , 'detail'])->name('books.detail');
-            Route::resource('books', BookController::class);
+            Route::resource('books', BookController::class)->only(['index', 'store', 'update', 'destroy']);
             Route::post('/books/{book}/copies', [BookController::class , 'storeCopy'])->name('books.copies.store');
+            Route::put('/copies/{copy}', [BookController::class , 'updateCopy'])->name('copies.update');
 
             // Sirkulasi
             Route::get('/peminjaman', fn() => \Inertia\Inertia::render('Admin/Sirkulasi/Index', ['page' => 'peminjaman']))->name('sirkulasi.peminjaman');
@@ -75,7 +78,6 @@ Route::middleware('auth')->group(function () {
 
             // Loans API
             Route::post('/loans', [LoanController::class , 'store'])->name('loans.store');
-            Route::get('/loans/{loan}', [LoanController::class , 'show'])->name('loans.show');
             Route::post('/loans/{loan}/extend', [LoanController::class , 'extend'])->name('loans.extend');
 
             // Scan helpers (JSON)
