@@ -38,7 +38,7 @@ class AuthController extends Controller
             ? route('home')
             : route('dashboard');
 
-        return redirect()->intended($redirect);
+        return redirect()->intended($redirect)->with('success', 'Login berhasil! Selamat datang.');
     }
 
     public function showRegister()

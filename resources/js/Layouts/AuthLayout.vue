@@ -94,8 +94,23 @@
     </div>
 
   </div>
+
+  <ToastNotification />
 </template>
 
 <script setup>
-// No imports needed
+import { watch } from 'vue'
+import { usePage } from '@inertiajs/vue3'
+import ToastNotification from '@/Components/ToastNotification.vue'
+import { useNotificationStore } from '@/stores/notification'
+
+const page = usePage()
+const notificationStore = useNotificationStore()
+
+watch(() => page.props.flash, (flash) => {
+  if (flash?.success) notificationStore.success(flash.success)
+  else if (flash?.error) notificationStore.error(flash.error)
+  else if (flash?.warning) notificationStore.warning(flash.warning)
+  else if (flash?.info) notificationStore.info(flash.info)
+}, { deep: true, immediate: true })
 </script>

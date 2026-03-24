@@ -173,7 +173,7 @@
                 <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="mx-auto mb-3 text-gray-300"><path stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
                 <div class="text-gray-500 font-medium">Belum ada buku ditemukan</div>
                 <p class="text-sm text-gray-400 mt-1">Coba ubah filter atau kata kunci pencarian</p>
-                <Link :href="route('books.create')" class="inline-block mt-4 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg text-sm transition">Tambah Buku Pertama</Link>
+                <button @click="openBookForm()" class="inline-block mt-4 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg text-sm transition">Tambah Buku Pertama</button>
               </td>
             </tr>
           </tbody>

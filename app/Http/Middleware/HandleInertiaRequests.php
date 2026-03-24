@@ -32,6 +32,8 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => session('success'),
                 'error'   => session('error'),
+                'warning' => session('warning'),
+                'info'    => session('info'),
             ],
             // Notif badge: jumlah anggota pending (hanya untuk admin/petugas)
             'pendingCount' => $user && in_array($user->role, ['admin', 'petugas'])

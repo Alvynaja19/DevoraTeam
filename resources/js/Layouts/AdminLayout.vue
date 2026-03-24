@@ -93,59 +93,15 @@
     </div>
 
     <!-- Toast Notifications -->
-    <Teleport to="body">
-      <Transition name="toast">
-        <div v-if="toast.show" class="fixed top-6 right-6 z-50 flex flex-col gap-3 min-w-[300px] pointer-events-none">
-          <!-- Success Toast -->
-          <div v-if="toast.type === 'success'" class="bg-white border-l-4 border-emerald-500 shadow-xl rounded-xl p-4 flex items-start gap-4 pointer-events-auto">
-            <div class="rounded-full bg-emerald-100 p-1 flex-shrink-0 mt-0.5">
-              <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            </div>
-            <div class="flex-1">
-              <h4 class="text-sm font-bold text-gray-900">Berhasil!</h4>
-              <p class="text-sm text-gray-500 mt-1">{{ toast.message }}</p>
-            </div>
-            <button @click="toast.show = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-          </div>
-
-          <!-- Error Toast -->
-          <div v-if="toast.type === 'error'" class="bg-white border-l-4 border-rose-500 shadow-xl rounded-xl p-4 flex items-start gap-4 pointer-events-auto">
-            <div class="rounded-full bg-rose-100 p-1 flex-shrink-0 mt-0.5">
-              <svg class="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </div>
-            <div class="flex-1">
-              <h4 class="text-sm font-bold text-gray-900">Oops, Gagal!</h4>
-              <p class="text-sm text-gray-500 mt-1">{{ toast.message }}</p>
-              <ul v-if="toast.errors && Object.keys(toast.errors).length > 0" class="list-disc pl-4 mt-2 text-xs text-rose-600">
-                <li v-for="(err, idx) in toast.errors" :key="idx">{{ err }}</li>
-              </ul>
-            </div>
-            <button @click="toast.show = false" class="text-gray-400 hover:text-gray-600 focus:outline-none">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
+    <ToastNotification />
   </div>
 </template>
 
 <style scoped>
-.toast-enter-active,
-.toast-leave-active {
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(100px) translateY(-10px);
-}
 </style>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
 import NavItem from '@/Components/NavItem.vue'
 import IconDashboard from '@/Components/Icons/IconDashboard.vue'
@@ -155,46 +111,32 @@ import IconLoan from '@/Components/Icons/IconLoan.vue'
 import IconReturn from '@/Components/Icons/IconReturn.vue'
 import IconFine from '@/Components/Icons/IconFine.vue'
 import IconSettings from '@/Components/Icons/IconSettings.vue'
+import ToastNotification from '@/Components/ToastNotification.vue'
+import { useNotificationStore } from '@/stores/notification'
 
 defineProps({ title: String })
 
 const page = usePage()
 const isAdmin = computed(() => page.props.auth?.user?.role === 'admin')
+const notificationStore = useNotificationStore()
 
 function isActive(name) {
   return route().current()?.startsWith(name)
 }
 
-// Toast System
-const toast = ref({
-  show: false,
-  type: '', // success or error
-  message: '',
-  errors: {}
-})
-
-// Watch for Inertia flash messages and display them as toasts
-watch(() => [page.props.flash, page.props.errors], ([flash, errors]) => {
-  let hasFlash = false
-  
+watch(() => page.props.flash, (flash) => {
+  const errors = page.props.errors
   if (flash?.success) {
-    toast.value = { show: true, type: 'success', message: flash.success, errors: {} }
-    hasFlash = true
-  } else if (flash?.error || (errors && Object.keys(errors).length > 0)) {
-    toast.value = { 
-      show: true, 
-      type: 'error', 
-      message: flash?.error || 'Terdapat kesalahan pada formulir.', 
-      errors: errors || {} 
-    }
-    hasFlash = true
-  }
-
-  // Auto hide after 4 seconds
-  if (hasFlash) {
-    setTimeout(() => {
-      toast.value.show = false
-    }, 4000)
+    notificationStore.success(flash.success)
+  } else if (flash?.error) {
+    notificationStore.error(flash.error)
+  } else if (flash?.warning) {
+    notificationStore.warning(flash.warning)
+  } else if (flash?.info) {
+    notificationStore.info(flash.info)
+  } else if (errors && Object.keys(errors).length > 0) {
+    const msgs = Object.values(errors).flat()
+    notificationStore.error(msgs[0] || 'Terdapat kesalahan pada formulir.')
   }
 }, { deep: true, immediate: true })
 </script>
