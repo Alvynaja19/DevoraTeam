@@ -11,16 +11,21 @@ class SettingController extends Controller
 {
     public function index()
     {
-        $settings = Setting::orderBy('group')->orderBy('key')->get()->groupBy('group');
+        $settings = Setting::where('group', '!=', 'general')
+            ->orderBy('group')
+            ->orderBy('key')
+            ->get()
+            ->groupBy('group');
+
         return Inertia::render('Admin/Settings/Index', ['settings' => $settings]);
     }
 
     public function update(Request $request)
     {
         $request->validate([
-            'settings'       => 'required|array',
+            'settings' => 'required|array',
             'settings.*.key' => 'required|string|exists:settings,key',
-            'settings.*.value' => 'required',
+            'settings.*.value' => 'nullable',
         ]);
 
         foreach ($request->settings as $item) {

@@ -71,10 +71,10 @@ Route::middleware('auth')->group(function () {
             Route::post('/books/{book}/copies', [BookController::class , 'storeCopy'])->name('books.copies.store');
             Route::put('/copies/{copy}', [BookController::class , 'updateCopy'])->name('copies.update');
 
-            // Sirkulasi
-            Route::get('/peminjaman', fn() => \Inertia\Inertia::render('Admin/Sirkulasi/Index', ['page' => 'peminjaman']))->name('sirkulasi.peminjaman');
-            Route::get('/pengembalian', fn() => \Inertia\Inertia::render('Admin/Sirkulasi/Index', ['page' => 'pengembalian']))->name('sirkulasi.pengembalian');
-            Route::get('/riwayat', [LoanController::class , 'riwayat'])->name('sirkulasi.riwayat');
+            // Transaksi & Riwayat
+            Route::get('/peminjaman', fn() => \Inertia\Inertia::render('Admin/Loans/Index'))->name('loans.index');
+            Route::get('/pengembalian', fn() => \Inertia\Inertia::render('Admin/Returns/Index'))->name('returns.index');
+            Route::get('/riwayat', [LoanController::class , 'riwayat'])->name('history.index');
 
             // Loans API
             Route::post('/loans', [LoanController::class , 'store'])->name('loans.store');

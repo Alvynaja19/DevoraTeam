@@ -669,7 +669,7 @@ function initAddCopy() {
   const bookCode = viewBook.value?.book_code || `BK-${String(viewBook.value?.id).padStart(4, '0')}`
   const nextIdx = (viewBookCopies.value?.length || 0) + 1
   addCopyForm.copy_code = `${bookCode}-C${nextIdx}`
-  addCopyForm.barcode = `BCS${Date.now()}`
+  addCopyForm.barcode = 'BC' + Math.floor(10000000 + Math.random() * 90000000)
   addCopyForm.condition = 'baik'
   addCopyForm.clearErrors()
   showAddCopyForm.value = true

@@ -86,7 +86,7 @@ class BooksImport implements ToCollection, WithHeadingRow
             for ($i = 0; $i < $jmlBuku; $i++) {
                 $copyIndex = BookCopy::where('book_id', $book->id)->count() + 1;
                 $copyCode = 'BK-' . str_pad($book->id, 4, '0', STR_PAD_LEFT) . '-C' . $copyIndex;
-                $barcode = 'BC' . substr(time(), -5) . rand(10, 99) . $book->id . $copyIndex;
+                $barcode = 'BC' . random_int(10000000, 99999999);
 
                 BookCopy::create([
                     'book_id'   => $book->id,

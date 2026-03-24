@@ -12,26 +12,29 @@ use Inertia\Inertia;
 
 class LoanController extends Controller
 {
-    public function __construct(private LoanService $loanService) {}
+    public function __construct(private LoanService $loanService)
+    {
+    }
 
     public function index(Request $request)
     {
         $loans = Loan::with(['member', 'items.copy.book', 'createdBy'])
-            ->when($request->status, function($q, $s) {
-                if ($s === 'terlambat') {
-                    $q->where(fn($q2) => $q2->where('status', 'terlambat')
-                        ->orWhere(fn($q3) => $q3->whereIn('status', ['aktif', 'diperpanjang'])
-                            ->whereRaw('COALESCE(extended_due_date, due_date) < ?', [now()->toDateString()])));
-                } else {
-                    $q->where('status', $s);
-                }
-            })
-            ->when($request->search,    fn($q, $s) => $q->whereHas('member', fn($m) => $m->where('name', 'like', "%{$s}%")
-                ->orWhere('member_code', 'like', "%{$s}%")))
+            ->when($request->status, function ($q, $s) {
+            if ($s === 'terlambat') {
+                $q->where(fn($q2) => $q2->where('status', 'terlambat')
+                ->orWhere(fn($q3) => $q3->whereIn('status', ['aktif', 'diperpanjang'])
+                ->whereRaw('COALESCE(extended_due_date, due_date) < ?', [now()->toDateString()])));
+            }
+            else {
+                $q->where('status', $s);
+            }
+        })
+            ->when($request->search, fn($q, $s) => $q->whereHas('member', fn($m) => $m->where('name', 'like', "%{$s}%")
+        ->orWhere('member_code', 'like', "%{$s}%")))
             ->latest()->paginate(20)->withQueryString();
 
         return Inertia::render('Admin/Loans/Index', [
-            'loans'   => $loans,
+            'loans' => $loans,
             'filters' => $request->only(['search', 'status']),
         ]);
     }
@@ -39,22 +42,22 @@ class LoanController extends Controller
     public function riwayat(Request $request)
     {
         $loans = Loan::with(['member', 'items.copy.book', 'createdBy'])
-            ->when($request->status, function($q, $s) {
-                if ($s === 'terlambat') {
-                    $q->where(fn($q2) => $q2->where('status', 'terlambat')
-                        ->orWhere(fn($q3) => $q3->whereIn('status', ['aktif', 'diperpanjang'])
-                            ->whereRaw('COALESCE(extended_due_date, due_date) < ?', [now()->toDateString()])));
-                } else {
-                    $q->where('status', $s);
-                }
-            })
-            ->when($request->search,  fn($q, $s) => $q->whereHas('member', fn($m) => $m->where('name', 'like', "%{$s}%")
-                ->orWhere('member_code', 'like', "%{$s}%")))
+            ->when($request->status, function ($q, $s) {
+            if ($s === 'terlambat') {
+                $q->where(fn($q2) => $q2->where('status', 'terlambat')
+                ->orWhere(fn($q3) => $q3->whereIn('status', ['aktif', 'diperpanjang'])
+                ->whereRaw('COALESCE(extended_due_date, due_date) < ?', [now()->toDateString()])));
+            }
+            else {
+                $q->where('status', $s);
+            }
+        })
+            ->when($request->search, fn($q, $s) => $q->whereHas('member', fn($m) => $m->where('name', 'like', "%{$s}%")
+        ->orWhere('member_code', 'like', "%{$s}%")))
             ->latest()->paginate(20)->withQueryString();
 
-        return Inertia::render('Admin/Sirkulasi/Index', [
-            'page'    => 'riwayat',
-            'loans'   => $loans,
+        return Inertia::render('Admin/History/Index', [
+            'loans' => $loans,
             'filters' => $request->only(['search', 'status']),
         ]);
     }
@@ -78,10 +81,10 @@ class LoanController extends Controller
         $validation = $this->loanService->validateMember($member);
 
         return response()->json([
-            'valid'   => $validation['valid'],
+            'valid' => $validation['valid'],
             'message' => $validation['message'],
-            'member'  => $member,
-            'quota'   => $validation['quota_remaining'] ?? null,
+            'member' => $member,
+            'quota' => $validation['quota_remaining'] ?? null,
         ]);
     }
 
@@ -109,9 +112,9 @@ class LoanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'member_code'  => 'required|string',
-            'barcodes'  => 'required|array|min:1|max:2',
-            'barcodes.*'=> 'required|string',
+            'member_code' => 'required|string',
+            'barcodes' => 'required|array|min:1|max:2',
+            'barcodes.*' => 'required|string',
             'loan_type' => 'required|in:pembaca,lomba',
         ]);
 
@@ -124,7 +127,7 @@ class LoanController extends Controller
 
         $loan = $this->loanService->create($member, $request->barcodes, $request->user(), $request->loan_type);
 
-        return redirect()->route('sirkulasi.riwayat')->with('success', 'Peminjaman berhasil dibuat.');
+        return redirect()->route('history.index')->with('success', 'Peminjaman berhasil dibuat.');
     }
 
     public function extend(Loan $loan, Request $request)
@@ -132,7 +135,8 @@ class LoanController extends Controller
         try {
             $this->loanService->extend($loan, $request->user());
             return back()->with('success', 'Peminjaman berhasil diperpanjang.');
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return back()->withErrors(['extend' => $e->getMessage()]);
         }
     }

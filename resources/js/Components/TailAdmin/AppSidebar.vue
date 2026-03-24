@@ -120,9 +120,9 @@ const menuGroups = computed(() => [
   {
     title: 'Sirkulasi',
     items: [
-      { name: 'Peminjaman', route: 'sirkulasi.peminjaman', icon: LoanIcon },
-      { name: 'Pengembalian', route: 'sirkulasi.pengembalian', icon: ReturnIcon },
-      { name: 'Riwayat', route: 'sirkulasi.riwayat', icon: ListIcon },
+      { name: 'Peminjaman', route: 'loans.index', icon: LoanIcon },
+      { name: 'Pengembalian', route: 'returns.index', icon: ReturnIcon },
+      { name: 'Riwayat', route: 'history.index', icon: ListIcon },
       { name: 'Denda', route: 'fines.index', icon: FineIcon },
     ],
   },

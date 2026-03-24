@@ -61,7 +61,7 @@
             <div class="font-semibold text-slate-800">Peminjaman Terbaru</div>
             <div class="text-xs text-slate-400 mt-0.5">10 transaksi terakhir</div>
           </div>
-          <Link :href="route('sirkulasi.riwayat')" class="text-sm text-indigo-500 font-medium hover:text-indigo-700">Lihat semua →</Link>
+          <Link :href="route('history.index')" class="text-sm text-indigo-500 font-medium hover:text-indigo-700">Lihat semua →</Link>
         </div>
         <div class="table-wrapper">
           <table>
@@ -123,11 +123,11 @@
         <div class="card card-body">
           <div class="font-semibold text-slate-800 mb-3">Aksi Cepat</div>
           <div class="space-y-2">
-            <Link :href="route('sirkulasi.peminjaman')" class="btn btn-primary w-full justify-center">
+            <Link :href="route('loans.index')" class="btn btn-primary w-full justify-center">
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M12 4.5v15m7.5-7.5h-15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               Peminjaman Baru
             </Link>
-            <Link :href="route('sirkulasi.pengembalian')" class="btn btn-secondary w-full justify-center">
+            <Link :href="route('returns.index')" class="btn btn-secondary w-full justify-center">
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Scan Pengembalian
             </Link>
