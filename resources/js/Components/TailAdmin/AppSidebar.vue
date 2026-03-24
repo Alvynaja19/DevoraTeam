@@ -122,6 +122,7 @@ const menuGroups = computed(() => [
     items: [
       { name: 'Peminjaman', route: 'loans.index', icon: LoanIcon },
       { name: 'Pengembalian', route: 'returns.index', icon: ReturnIcon },
+      { name: 'Presensi', route: 'visits.index', icon: UserGroupIcon },
       { name: 'Riwayat', route: 'history.index', icon: ListIcon },
       { name: 'Denda', route: 'fines.index', icon: FineIcon },
     ],

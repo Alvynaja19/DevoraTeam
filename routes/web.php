@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\LoanController;
 use App\Http\Controllers\Admin\ReturnController;
 use App\Http\Controllers\Admin\FineController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\VisitController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\Anggota\ProfileController;
 
@@ -75,6 +76,11 @@ Route::middleware('auth')->group(function () {
             Route::get('/peminjaman', fn() => \Inertia\Inertia::render('Admin/Loans/Index'))->name('loans.index');
             Route::get('/pengembalian', fn() => \Inertia\Inertia::render('Admin/Returns/Index'))->name('returns.index');
             Route::get('/riwayat', [LoanController::class , 'riwayat'])->name('history.index');
+            
+            // Presensi
+            Route::get('/presensi', [VisitController::class, 'index'])->name('visits.index');
+            Route::post('/presensi/check', [VisitController::class, 'check'])->name('visits.check');
+            Route::post('/presensi', [VisitController::class, 'store'])->name('visits.store');
 
             // Loans API
             Route::post('/loans', [LoanController::class , 'store'])->name('loans.store');
