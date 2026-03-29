@@ -27,9 +27,9 @@
       <div class="space-y-1.5">
         <div class="flex items-center justify-between">
           <label class="block text-xs font-semibold tracking-widest text-gray-500 uppercase">Password</label>
-          <button type="button" class="text-xs text-emerald-600 hover:text-emerald-700 font-medium transition-colors">
+          <Link :href="route('password.request')" class="text-xs text-emerald-600 hover:text-emerald-700 font-medium transition-colors">
             Lupa Password?
-          </button>
+          </Link>
         </div>
         <div class="relative">
           <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="16" height="16" fill="none" viewBox="0 0 24 24">

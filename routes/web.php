@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\BookController;
@@ -27,6 +28,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class , 'login']);
     Route::get('/register', [AuthController::class , 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class , 'register']);
+
+    // Lupa Password (OTP)
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'show'])->name('password.request');
+    Route::post('/forgot-password/send-otp', [ForgotPasswordController::class, 'sendOtp'])->name('password.email');
+    Route::post('/forgot-password/verify-otp', [ForgotPasswordController::class, 'verifyOtp'])->name('password.verify');
+    Route::post('/forgot-password/reset', [ForgotPasswordController::class, 'resetPassword'])->name('password.update');
 
     // Klaim Akun (NIS/NIP first-login)
     Route::get('/claim-account', [AuthController::class , 'showClaim'])->name('claim.show');
