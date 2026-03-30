@@ -78,6 +78,9 @@ async function startScanner() {
     scanner = new Html5Qrcode(readerId, {
       formatsToSupport: formats,
       verbose: false,
+      experimentalFeatures: {
+        useBarCodeDetectorIfSupported: true
+      }
     })
 
     const config = {
@@ -105,15 +108,18 @@ async function startScanner() {
       scanner = new Html5Qrcode(readerId, {
         formatsToSupport: formats,
         verbose: false,
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true
+        }
       })
 
       await scanner.start(
         { facingMode: 'user' },
         {
-          fps: 10,
+          fps: 15,
           qrbox: props.type === 'qr'
-            ? { width: 200, height: 200 }
-            : { width: 280, height: 100 },
+            ? { width: 250, height: 250 }
+            : { width: 300, height: 120 },
         },
         (decodedText) => {
           emit('scanned', decodedText)
