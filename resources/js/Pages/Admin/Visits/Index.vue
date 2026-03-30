@@ -138,8 +138,9 @@
       <!-- Filter & Search Card -->
       <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row gap-4 items-center justify-between mb-4">
         <!-- Left: Rows per page -->
-        <div class="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
-          <span>Tampilkan</span>
+        <div class="flex items-center gap-4 text-sm text-gray-600 whitespace-nowrap">
+          <div class="flex items-center gap-2">
+            <span>Tampilkan</span>
           <select v-model="filterForm.perPage" @change="applyFilters"
             class="px-3 py-1.5 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
             <option :value="10">10</option>
@@ -148,6 +149,7 @@
             <option :value="100">100</option>
           </select>
           <span>baris</span>
+          </div>
         </div>
 
         <!-- Right: Status filter & Search -->
@@ -188,10 +190,12 @@
               <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Visitor</th>
               <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Waktu / Jam</th>
               <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Tujuan</th>
+              <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-right text-gray-700 uppercase">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <tr v-if="visits && visits.data && visits.data.length > 0" v-for="(visit, i) in visits.data" :key="visit.id" class="hover:bg-gray-50 transition-colors">
+            <template v-if="visits && visits.data && visits.data.length > 0">
+              <tr v-for="(visit, i) in visits.data" :key="visit.id" class="hover:bg-gray-50 transition-colors">
               <td class="px-3 md:px-6 py-3 md:py-4 text-sm font-medium text-gray-900">{{ (visits.from || 1) + i }}</td>
               <td class="px-3 md:px-6 py-3 md:py-4">
                 <div class="flex items-center gap-3">
@@ -217,10 +221,17 @@
                   {{ visit.category }}
                 </span>
               </td>
+              <td class="px-3 md:px-6 py-3 md:py-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <button @click="openEditModal(visit)" class="px-3 py-1 text-sm text-emerald-600 hover:text-emerald-700 font-medium">Edit</button>
+                  <button @click="confirmDelete(visit)" class="px-3 py-1 text-sm text-red-600 hover:text-red-700 font-medium">Hapus</button>
+                </div>
+              </td>
             </tr>
+            </template>
             <!-- Empty state row -->
-            <tr v-if="!visits || !visits.data || visits.data.length === 0">
-              <td colspan="4" class="px-6 py-16 text-center">
+            <tr v-else>
+              <td colspan="5" class="px-6 py-16 text-center">
                 <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="mx-auto mb-3 text-gray-300"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <div class="text-gray-500 font-medium">Belum ada catatan pengunjung hari ini.</div>
               </td>
@@ -245,6 +256,70 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- Modal Form (Edit Tujuan Kunjungan) -->
+    <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden" @click.stop>
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <h3 class="text-lg font-bold text-gray-900">Edit Tujuan Kunjungan</h3>
+          <button @click="closeModal" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <form @submit.prevent="saveVisitParams" class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Anggota</label>
+            <input type="text" class="form-input w-full bg-gray-100 text-gray-500" disabled :value="editingVisit?.member?.name + ' (' + (editingVisit?.member?.member_code || '') + ')'">
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+              <input type="date" class="form-input w-full bg-gray-100 text-gray-500" disabled :value="editingVisit?.visit_date?.substring(0, 10)">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Jam</label>
+              <input type="time" class="form-input w-full bg-gray-100 text-gray-500" disabled :value="editingVisit?.visit_time?.substring(0, 5)">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Tujuan Kunjungan</label>
+            <select v-model="editForm.category" class="form-input w-full" required :disabled="editForm.processing">
+              <option value="membaca">Membaca Buku</option>
+              <option value="pengunjung">Kunjungan</option>
+            </select>
+          </div>
+
+          <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+            <button type="button" @click="closeModal" class="btn btn-outline text-gray-600 border-gray-300">Batal</button>
+            <button type="submit" class="btn btn-primary" :disabled="editForm.processing">
+              {{ editForm.processing ? 'Menyimpan...' : 'Simpan' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Confirm Modal -->
+    <div v-if="deleteTarget" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 dark:bg-slate-800">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#f43f5e" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-slate-800 dark:text-white">Hapus Presensi</h3>
+            <p class="text-sm text-slate-500">Tindakan ini tidak dapat dibatalkan.</p>
+          </div>
+        </div>
+        <p class="text-sm text-slate-600 dark:text-slate-300 mb-5">
+          Yakin ingin menghapus data kunjungan <strong>{{ deleteTarget.member?.name }}</strong> pada {{ deleteTarget.visit_time }}?
+        </p>
+        <div class="flex justify-end gap-3">
+          <button @click="deleteTarget = null" class="btn btn-secondary">Batal</button>
+          <button @click="doDelete" class="btn bg-rose-600 hover:bg-rose-700 text-white">Ya, Hapus</button>
+        </div>
+      </div>
     </div>
   </AdminLayout>
 </template>
@@ -340,6 +415,52 @@ function cancelScan() {
   scannedMember.value = null
   nextTick(() => {
     if (barcodeInput.value) barcodeInput.value.focus()
+  })
+}
+
+// ── CRUD Methods ──────────────────────────────────────────
+const isModalOpen = ref(false)
+const editingVisit = ref(null)
+
+const editForm = useForm({
+  category: 'membaca',
+})
+
+function openEditModal(visit) {
+  editingVisit.value = visit
+  editForm.reset()
+  editForm.category = visit.category
+  editForm.clearErrors()
+  isModalOpen.value = true
+}
+
+function closeModal() {
+  isModalOpen.value = false
+}
+
+function saveVisitParams() {
+  editForm.put(route('visits.update', editingVisit.value.id), {
+    preserveState: true,
+    onSuccess: () => {
+      closeModal()
+    }
+  })
+}
+
+// ── Delete Modal Methods ──────────────────────────────────────────
+const deleteTarget = ref(null)
+
+function confirmDelete(visit) {
+  deleteTarget.value = visit
+}
+
+function doDelete() {
+  if (!deleteTarget.value) return
+  router.delete(route('visits.destroy', deleteTarget.value.id), {
+    preserveState: true,
+    onSuccess: () => {
+      deleteTarget.value = null
+    }
   })
 }
 </script>

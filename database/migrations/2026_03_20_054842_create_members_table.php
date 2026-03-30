@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('phone', 20)->nullable();
             $table->text('address')->nullable();
             $table->string('photo', 255)->nullable();
-            $table->enum('status', ['pending', 'aktif', 'nonaktif', 'suspended', 'ditolak'])->default('pending');
+            $table->enum('status', ['pending', 'aktif', 'nonaktif', 'suspended', 'ditolak'])->default('aktif');
             $table->date('expired_at')->nullable()->comment('NULL = tidak ada batas');
             $table->timestamp('verified_at')->nullable();
             $table->foreignId('verified_by')->nullable()->constrained('users')->nullOnDelete();

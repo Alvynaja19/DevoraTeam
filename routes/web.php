@@ -50,10 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class , 'index'])->name('dashboard');
 
     Route::middleware('role:anggota')->prefix('anggota')->name('anggota.')->group(function () {
-            Route::get('/profile', [ProfileController::class , 'show'])->name('profile');
-            Route::put('/profile', [ProfileController::class , 'update'])->name('profile.update');
-        }
-        );
+        Route::get('/profile', [ProfileController::class , 'show'])->name('profile');
+        Route::put('/profile', [ProfileController::class , 'update'])->name('profile.update');
+    });
 
         // ── Admin & Petugas ──────────────────────────────────────────────────
         Route::middleware('role:admin|petugas')->group(function () {
@@ -88,6 +87,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/presensi', [VisitController::class, 'index'])->name('visits.index');
             Route::post('/presensi/check', [VisitController::class, 'check'])->name('visits.check');
             Route::post('/presensi', [VisitController::class, 'store'])->name('visits.store');
+            Route::put('/presensi/{visit}', [VisitController::class, 'update'])->name('visits.update');
+            Route::delete('/presensi/{visit}', [VisitController::class, 'destroy'])->name('visits.destroy');
 
             // Loans API
             Route::post('/loans', [LoanController::class , 'store'])->name('loans.store');
@@ -109,12 +110,15 @@ Route::middleware('auth')->group(function () {
             // Kelas
             Route::resource('kelas', KelasController::class)->only(['index', 'store', 'update', 'destroy']);
 
-            // Settings (admin only)
-            Route::middleware('role:admin')->group(function () {
-                    Route::get('/settings', [SettingController::class , 'index'])->name('settings.index');
-                    Route::post('/settings', [SettingController::class , 'update'])->name('settings.update');
-                }
-                );
-            }
-            );
+        // Settings (admin only)
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/settings', [SettingController::class , 'index'])->name('settings.index');
+            Route::post('/settings', [SettingController::class , 'update'])->name('settings.update');
         });
+
+        // Notifications
+        Route::post('/notifications/{notification}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.read');
+        Route::post('/notifications/read-all', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+
+    });
+});

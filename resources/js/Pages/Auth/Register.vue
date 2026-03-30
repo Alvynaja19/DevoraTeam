@@ -70,13 +70,6 @@
         </div>
       </div>
 
-      <!-- Info box -->
-      <div class="flex items-start gap-2.5 p-3 rounded-xl text-xs text-emerald-800 bg-emerald-50 border border-emerald-100">
-        <svg class="flex-shrink-0 mt-0.5" width="13" height="13" fill="none" viewBox="0 0 24 24">
-          <path d="M11.25 11.25l.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>Akun akan berstatus <strong>Menunggu Verifikasi</strong> hingga disetujui admin. Kamu bisa lengkapi data di <strong>Profile Saya</strong> setelah daftar.</span>
-      </div>
 
       <!-- Submit -->
       <button type="submit" :disabled="form.processing"

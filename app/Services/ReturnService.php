@@ -89,6 +89,18 @@ class ReturnService
                 $loanItem->loan->update(['status' => 'selesai']);
             }
 
+            // Notifikasi untuk admin/petugas jika ada denda baru
+            if ($fines->isNotEmpty()) {
+                $totalFine = $fines->sum('amount');
+                $memberName = $loanItem->loan->member->name ?? 'Unknown';
+                \App\Models\AdminNotification::create([
+                    'type' => 'denda_belum_lunas',
+                    'title' => 'Denda Belum Lunas',
+                    'message' => "Terdapat denda baru sebesar Rp" . number_format($totalFine, 0, ',', '.') . " atas nama {$memberName} yang belum dibayar.",
+                    'url' => route('fines.index'),
+                ]);
+            }
+
             return $fines;
         });
 

@@ -29,13 +29,6 @@
           <div class="profile-code-block">
             <div class="code-label">Kode Anggota</div>
             <div class="code-value">{{ member?.member_code || '—' }}</div>
-            <div v-if="member?.status === 'pending'" class="pending-info">
-              <svg width="13" height="13" fill="none" viewBox="0 0 24 24">
-                <path d="M12 9v3.75m9.303 3.376c.866 1.5-.217 3.374-1.948 3.374H4.645c-1.73 0-2.813-1.874-1.948-3.374l7.5-12.998c.866-1.5 3.032-1.5 3.898 0z"
-                  stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-              </svg>
-              Menunggu verifikasi admin
-            </div>
           </div>
         </div>
 
@@ -129,7 +122,7 @@
                 :class="completeness >= 80 ? 'full' : completeness >= 50 ? 'mid' : 'low'"/>
             </div>
             <p v-if="completeness < 100" class="completeness-hint">
-              Lengkapi profil kamu untuk memudahkan proses verifikasi admin.
+              Lengkapi profil kamu agar data keanggotaan lebih lengkap.
               <button @click="activeTab = 'edit'" class="fill-prompt">Lengkapi →</button>
             </p>
           </div>
@@ -144,14 +137,7 @@
             <div class="qr-info">
               <div class="qr-name">{{ user.name }}</div>
               <div class="qr-code">{{ member.member_code }}</div>
-              <div v-if="member.status === 'pending'" class="qr-warning">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
-                  <path d="M12 9v3.75m9.303 3.376c.866 1.5-.217 3.374-1.948 3.374H4.645c-1.73 0-2.813-1.874-1.948-3.374l7.5-12.998c.866-1.5 3.032-1.5 3.898 0z"
-                    stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                </svg>
-                QR aktif setelah diverifikasi admin
-              </div>
-              <div v-else class="qr-ready">
+              <div class="qr-ready">
                 <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd"/>
                 </svg>

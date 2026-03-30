@@ -68,7 +68,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('home')->with('success', 'Registrasi berhasil! Akun kamu sedang menunggu verifikasi admin.');
+        return redirect()->route('home')->with('success', 'Registrasi berhasil! Selamat datang di perpustakaan.');
     }
 
     // ── Klaim Akun (NIS/NIP) ──
