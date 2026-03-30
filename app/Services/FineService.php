@@ -31,6 +31,7 @@ class FineService
                     'paid_at'      => now(),
                     'confirmed_by' => $receivedBy->id,
                 ]);
+                $this->clearFineNotificationIfAllPaid($fine);
             }
 
             return $payment;
@@ -48,6 +49,8 @@ class FineService
             'freed_reason' => $reason,
         ]);
 
+        $this->clearFineNotificationIfAllPaid($fine);
+
         return $fine->fresh();
     }
 
@@ -59,5 +62,23 @@ class FineService
         return Fine::whereHas('loanItem.loan', fn($q) => $q->where('member_id', $memberId))
             ->where('status', 'belum_lunas')
             ->sum('amount');
+    }
+
+    /**
+     * Clear the 'denda_belum_lunas' notification for a member if they have paid all their fines.
+     */
+    private function clearFineNotificationIfAllPaid(Fine $fine): void
+    {
+        $fine->loadMissing('loanItem.loan.member');
+        $memberId = $fine->loanItem?->loan?->member_id;
+        $memberName = $fine->loanItem?->loan?->member?->name;
+
+        if ($memberId && $memberName) {
+            if ($this->totalUnpaid($memberId) <= 0) {
+                \App\Models\AdminNotification::where('type', 'denda_belum_lunas')
+                    ->where('message', 'like', "%{$memberName}%")
+                    ->update(['is_read' => true]);
+            }
+        }
     }
 }

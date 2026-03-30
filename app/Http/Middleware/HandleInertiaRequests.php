@@ -28,6 +28,10 @@ class HandleInertiaRequests extends Middleware
                     'email' => $user->email,
                     'role'  => $user->role,
                 ] : null,
+                'notifications' => $user && in_array($user->role, ['admin', 'petugas']) ? [
+                    'unreadCount' => \App\Models\AdminNotification::where('is_read', false)->count(),
+                    'latest'      => \App\Models\AdminNotification::where('is_read', false)->latest()->take(5)->get(),
+                ] : null,
             ],
             'flash' => [
                 'success' => session('success'),
@@ -36,10 +40,6 @@ class HandleInertiaRequests extends Middleware
                 'info'    => session('info'),
                 'reset_token' => session('reset_token'),
             ],
-            // Notif badge: jumlah anggota pending (hanya untuk admin/petugas)
-            'pendingCount' => $user && in_array($user->role, ['admin', 'petugas'])
-                ? Member::where('status', 'pending')->count()
-                : 0,
         ];
     }
 }

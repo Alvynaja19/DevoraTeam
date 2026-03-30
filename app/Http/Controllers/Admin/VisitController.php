@@ -66,7 +66,10 @@ class VisitController extends Controller
     {
         $request->validate(['barcode' => 'required|string']);
 
-        $member = Member::where('member_code', $request->barcode)->with('kelas')->first();
+        $member = Member::where('member_code', $request->barcode)
+            ->orWhere('nis_nip', $request->barcode)
+            ->with('kelas')
+            ->first();
 
         if (!$member) {
             return response()->json(['valid' => false, 'message' => 'Anggota tidak ditemukan.'], 404);
@@ -89,7 +92,9 @@ class VisitController extends Controller
             'category' => 'required|in:membaca,pengunjung',
         ]);
 
-        $member = Member::where('member_code', $request->barcode)->first();
+        $member = Member::where('member_code', $request->barcode)
+            ->orWhere('nis_nip', $request->barcode)
+            ->first();
         if (!$member) {
             return back()->with('error', 'Barcode anggota tidak ditemukan.');
         }
@@ -118,5 +123,24 @@ class VisitController extends Controller
         ]);
 
         return back()->with('success', "Presensi {$member->name} ({$request->category}) berhasil dicatat.");
+    }
+
+    public function update(Request $request, Visit $visit)
+    {
+        $request->validate([
+            'category'   => 'required|in:membaca,pengunjung',
+        ]);
+
+        $visit->update([
+            'category'   => $request->category,
+        ]);
+
+        return back()->with('success', 'Tujuan kunjungan berhasil diperbarui.');
+    }
+
+    public function destroy(Visit $visit)
+    {
+        $visit->delete();
+        return back()->with('success', 'Data kunjungan berhasil dihapus.');
     }
 }

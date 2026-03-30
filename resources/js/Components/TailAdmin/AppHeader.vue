@@ -38,11 +38,8 @@
         <div class="flex items-center gap-2 2xsm:gap-3">
           <ThemeToggler />
           
-          <!-- Basic Notif Icon -->
-          <Link :href="route('dashboard')" class="relative flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-indigo-600 h-11 w-11 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white">
-            <span v-if="$page.props.pendingCount > 0" class="absolute right-0 top-0.5 z-10 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white dark:border-gray-900"></span>
-            <BellIcon class="w-5 h-5" />
-          </Link>
+          <!-- Notification Dropdown -->
+          <NotificationDropdown />
         </div>
 
         <UserMenu />
@@ -58,8 +55,8 @@ import { useSidebar } from '@/Composables/useSidebar'
 import ThemeToggler from './ThemeToggler.vue'
 import SearchBar from './SearchBar.vue'
 import UserMenu from './UserMenu.vue'
+import NotificationDropdown from './NotificationDropdown.vue'
 import MenuIcon from '@/Components/TailAdminIcons/MenuIcon.vue'
-import BellIcon from '@/Components/TailAdminIcons/BellIcon.vue'
 import HorizontalDots from '@/Components/TailAdminIcons/HorizontalDots.vue'
 
 const { toggleSidebar, toggleMobileSidebar, isMobileOpen } = useSidebar()

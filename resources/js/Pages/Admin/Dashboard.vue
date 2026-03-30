@@ -9,11 +9,6 @@
         <div>
           <div class="text-2xl font-bold text-slate-800">{{ stats.total_anggota }}</div>
           <div class="text-sm text-slate-500 mt-0.5">Anggota Aktif</div>
-          <div v-if="stats.pending_approval > 0" class="mt-1">
-            <Link :href="route('members.index', { status: 'pending' })" class="text-xs text-indigo-500 font-medium hover:text-indigo-700">
-              {{ stats.pending_approval }} menunggu verifikasi →
-            </Link>
-          </div>
         </div>
       </div>
 
@@ -95,29 +90,28 @@
         </div>
       </div>
 
-      <!-- Pending Members + Overdue -->
+      <!-- Right Panel -->
       <div class="space-y-6">
-        <!-- Pending Members -->
+        <!-- Overdue Loans -->
         <div class="card">
           <div class="card-header">
-            <div class="font-semibold text-slate-800">Menunggu Persetujuan</div>
-            <span v-if="pendingMembers.length > 0" class="badge badge-yellow">{{ pendingMembers.length }}</span>
+            <div class="font-semibold text-slate-800">Pinjaman Terlambat</div>
+            <span v-if="overdueLoans.length > 0" class="badge badge-red">{{ overdueLoans.length }}</span>
           </div>
           <div class="divide-y divide-slate-50">
-            <div v-for="member in pendingMembers" :key="member.id" class="px-5 py-3 flex items-center justify-between">
+            <div v-for="loan in overdueLoans" :key="loan.id" class="px-5 py-3 flex items-center justify-between">
               <div>
-                <div class="text-sm font-medium text-slate-800">{{ member.name }}</div>
-                <div class="text-xs text-slate-400 mt-0.5">{{ member.type }} · {{ member.kelas?.name || '-' }}</div>
+                <div class="text-sm font-medium text-slate-800">{{ loan.member?.name }}</div>
+                <div class="text-xs text-red-500 mt-0.5">Jatuh tempo: {{ formatDate(loan.due_date) }}</div>
               </div>
-              <div class="flex gap-2">
-                <Link :href="route('members.show', member.id)" class="btn btn-sm btn-secondary">Lihat</Link>
-              </div>
+              <Link :href="route('loans.show', loan.id)" class="btn btn-sm btn-secondary">Lihat</Link>
             </div>
-            <div v-if="pendingMembers.length === 0" class="px-5 py-6 text-center text-sm text-slate-400">
-              Tidak ada anggota pending ✓
+            <div v-if="overdueLoans.length === 0" class="px-5 py-6 text-center text-sm text-slate-400">
+              Tidak ada pinjaman terlambat ✓
             </div>
           </div>
         </div>
+
 
         <!-- Quick Actions -->
         <div class="card card-body">
@@ -131,9 +125,9 @@
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Scan Pengembalian
             </Link>
-            <Link :href="route('members.index', { status: 'pending' })" class="btn btn-secondary w-full justify-center">
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Verifikasi Anggota
+            <Link :href="route('members.index')" class="btn btn-secondary w-full justify-center">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Kelola Anggota
             </Link>
           </div>
         </div>
@@ -151,7 +145,6 @@ const props = defineProps({
   stats: Object,
   recentLoans: Array,
   overdueLoans: Array,
-  pendingMembers: Array,
 })
 
 function formatRupiah(n) {

@@ -39,7 +39,7 @@ class MemberService
     }
 
     /**
-     * Registrasi anggota baru (status pending).
+     * Registrasi anggota baru (status langsung aktif).
      */
     public function register(User $user, array $data): Member
     {
@@ -54,7 +54,9 @@ class MemberService
                 'nis_nip'     => $data['nis_nip'] ?? null,
                 'phone'       => $data['phone'] ?? null,
                 'address'     => $data['address'] ?? null,
-                'status'      => 'pending',
+                'status'      => 'aktif',
+                'verified_at' => now(),
+                'expired_at'  => now()->addYear(),
             ]);
 
             $user->assignRole('anggota');
