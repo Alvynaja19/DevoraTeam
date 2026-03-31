@@ -59,6 +59,8 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     icu-dev \
     oniguruma-dev \
+    linux-headers \
+    $PHPIZE_DEPS \
     && rm -rf /var/cache/apk/*
 
 # Install PHP extensions
@@ -73,7 +75,9 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         bcmath \
         gd \
         intl \
-        opcache
+        opcache \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
 WORKDIR /var/www/html
 
