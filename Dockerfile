@@ -1,5 +1,25 @@
 # ============================================================
-# Stage 1: Build Frontend Assets (Node.js)
+# Stage 1: Composer Dependencies
+# ============================================================
+FROM composer:2.7 AS composer-builder
+
+WORKDIR /app
+
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-scripts \
+    --no-autoloader \
+    --prefer-dist \
+    --optimize-autoloader
+
+COPY . .
+RUN composer dump-autoload --optimize
+
+
+# ============================================================
+# Stage 2: Build Frontend Assets (Node.js)
+# Butuh vendor/ karena Vite perlu tightenco/ziggy
 # ============================================================
 FROM node:20-alpine AS frontend-builder
 
@@ -9,15 +29,19 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --frozen-lockfile
 
-# Copy source and build
+# Copy source files
 COPY resources/ ./resources/
 COPY vite.config.js ./
 COPY public/ ./public/
+
+# Copy vendor dari composer stage (diperlukan oleh Ziggy)
+COPY --from=composer-builder /app/vendor ./vendor
+
 RUN npm run build
 
 
 # ============================================================
-# Stage 2: PHP Application (Production)
+# Stage 3: PHP Application (Production)
 # ============================================================
 FROM php:8.3-fpm-alpine AS app
 
@@ -50,29 +74,19 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         intl \
         opcache
 
-# Install Composer
-COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
-
 WORKDIR /var/www/html
-
-# Copy composer files first for better caching
-COPY composer.json composer.lock ./
-RUN composer install \
-    --no-dev \
-    --no-scripts \
-    --no-autoloader \
-    --prefer-dist \
-    --optimize-autoloader
 
 # Copy application files
 COPY . .
 
-# Copy built frontend assets from stage 1
+# Copy vendor dari composer stage (tidak perlu install ulang)
+COPY --from=composer-builder /app/vendor ./vendor
+
+# Copy built frontend assets dari stage 2
 COPY --from=frontend-builder /app/public/build ./public/build
 
-# Run composer scripts & optimize
-RUN composer dump-autoload --optimize \
-    && php artisan config:cache \
+# Optimize Laravel untuk production
+RUN php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
 
