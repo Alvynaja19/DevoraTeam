@@ -86,11 +86,6 @@ COPY --from=composer-builder /app/vendor ./vendor
 # Copy built frontend assets dari stage 2
 COPY --from=frontend-builder /app/public/build ./public/build
 
-# Optimize Laravel untuk production
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
-
 # Set permissions
 RUN chown -R www-data:www-data \
         storage \
