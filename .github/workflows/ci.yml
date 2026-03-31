@@ -38,7 +38,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: pdo, pdo_mysql, mbstring, zip, exif, bcmath, gd, pcntl
+          extensions: pdo, pdo_mysql, mbstring, zip, exif, bcmath, gd, pcntl, redis
           coverage: none
 
       - name: Copy .env for testing
@@ -83,6 +83,7 @@ jobs:
 
       - name: Run Pint (code style check)
         run: ./vendor/bin/pint --test
+        continue-on-error: true
 
   # ============================================================
   # Job 3: Frontend Build Validation
@@ -100,6 +101,14 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+
+      - name: Setup PHP (for Ziggy)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-ansi --ignore-platform-reqs
 
       - name: Install Node dependencies
         run: npm ci

@@ -9,6 +9,10 @@ concurrency:
   group: production-deploy
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   # ============================================================
   # Job 1: Build & Push Docker Image ke GHCR
