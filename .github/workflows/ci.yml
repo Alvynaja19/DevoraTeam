@@ -60,7 +60,7 @@ jobs:
         run: php artisan migrate --force
 
       - name: Run test suite
-        run: php artisan test --parallel
+        run: php artisan test
 
   # ============================================================
   # Job 2: Code Style (Laravel Pint)
