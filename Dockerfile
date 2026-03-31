@@ -97,6 +97,9 @@ RUN chown -R www-data:www-data \
         bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+# Buat direktori untuk Supervisor log
+RUN mkdir -p /var/log/supervisor
+
 # Copy configs
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
