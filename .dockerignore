@@ -36,8 +36,7 @@ database/*.sqlite
 # Build artifacts (rebuilt inside container)
 public/hot
 
-# Docker files (not needed inside image)
-docker/
+# Docker Compose & root Dockerfile (tidak perlu di dalam image)
 docker-compose*.yml
 Dockerfile
 
