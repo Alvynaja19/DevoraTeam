@@ -16,12 +16,9 @@
       <div class="relative z-10">
         <div class="flex flex-col items-start gap-4">
           <!-- Icon logo -->
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center"
+          <div class="w-20 h-20 rounded-2xl flex items-center justify-center p-2"
             style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15)">
-            <svg width="32" height="32" fill="none" viewBox="0 0 24 24">
-              <path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"
-                stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <img src="/images/logo-sman4-jember.png" alt="Logo SMAN 4" class="w-full h-full object-contain drop-shadow-xl" />
           </div>
           <div>
             <h2 class="text-white text-2xl font-bold leading-tight">Sistem Perpustakaan</h2>

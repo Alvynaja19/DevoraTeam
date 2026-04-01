@@ -19,9 +19,12 @@
 
           <!-- Logo + Nav Links -->
           <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-            <Link :href="route('home')" class="flex shrink-0 items-baseline gap-1.5 no-underline">
-              <span class="font-[500] text-[1.45rem] text-[#1a1f1c] tracking-[0.01em]" style="font-family: 'Cormorant Garamond', Georgia, serif">SMA NEGERI 4 JEMBER</span>
-              <!-- <span class="hidden sm:inline text-[0.72rem] text-[#8a9490] tracking-[0.04em]">Perpustakaan</span> -->
+            <Link :href="route('home')" class="flex shrink-0 items-center gap-2.5 no-underline">
+              <img src="/images/logo-sman4-jember.png" alt="Logo SMAN 4 Jember" class="h-10 w-auto drop-shadow-sm" />
+              <div class="flex flex-col">
+                <span class="font-[600] text-[1.2rem] text-[#1a1f1c] leading-tight" style="font-family: 'Cormorant Garamond', Georgia, serif">SMA NEGERI 4 JEMBER</span>
+                <span class="text-[0.65rem] text-[#4a5250] font-medium tracking-wide uppercase">Perpustakaan Digital</span>
+              </div>
             </Link>
 
             <!-- Desktop nav -->
@@ -134,7 +137,10 @@
     <footer class="site-footer">
       <div class="footer-top">
         <div class="footer-brand">
-          <div class="footer-logo">SMA NEGERI 4 JEMBER</div>
+          <div class="flex items-center gap-3 mb-3">
+            <img src="/images/logo-sman4-jember.png" alt="Logo SMAN 4 Jember" class="h-12 w-auto" />
+            <div class="footer-logo !mb-0" style="margin-bottom:0">SMA NEGERI 4<br/>JEMBER</div>
+          </div>
           <p class="footer-brand-desc">
             Perpustakaan digital sekolah yang menghadirkan pengetahuan untuk mendukung kegiatan belajar mengajar.
           </p>
