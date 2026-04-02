@@ -279,9 +279,15 @@
 
         <!-- Header Modal -->
         <div class="flex items-start gap-4 p-6 border-b border-slate-100 dark:border-slate-700">
-          <div class="w-16 h-20 rounded-lg flex-shrink-0 flex items-center justify-center shadow"
-               :style="`background: linear-gradient(135deg, ${coverGradient(viewBook.category_id)})`">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" class="opacity-50">
+          <div class="w-16 h-20 rounded-lg flex-shrink-0 flex items-center justify-center shadow overflow-hidden"
+               :style="!viewBook.cover_image ? `background: linear-gradient(135deg, ${coverGradient(viewBook.category_id)})` : ''">
+            <img
+              v-if="viewBook.cover_image"
+              :src="viewBook.cover_image.startsWith('http') ? viewBook.cover_image : '/' + viewBook.cover_image"
+              :alt="viewBook.title"
+              class="w-full h-full object-cover"
+            />
+            <svg v-else width="24" height="24" fill="none" viewBox="0 0 24 24" class="opacity-50">
               <path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
