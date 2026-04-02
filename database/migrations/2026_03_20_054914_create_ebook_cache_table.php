@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('external_id', 100);
             $table->json('data')->comment('Raw response dari API');
             $table->timestamp('cached_at')->useCurrent();
-            $table->timestamp('expires_at');
+            $table->timestamp('expires_at')->nullable();
 
             $table->unique(['source', 'external_id']);
         });
