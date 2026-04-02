@@ -30,7 +30,6 @@ class Member extends Model
     // Relasi transaksi
     public function loans()         { return $this->hasMany(Loan::class); }
     public function visits()        { return $this->hasMany(Visit::class); }
-    public function reservations()  { return $this->hasMany(Reservation::class); }
     public function bookRatings()   { return $this->hasMany(BookRating::class); }
     public function notifications() { return $this->hasMany(MemberNotification::class); }
 

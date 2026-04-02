@@ -22,7 +22,6 @@ class Book extends Model
     public function category()     { return $this->belongsTo(Category::class); }
     public function copies()       { return $this->hasMany(BookCopy::class); }
     public function ratings()      { return $this->hasMany(BookRating::class); }
-    public function reservations() { return $this->hasMany(Reservation::class); }
 
     public function availableCopies()
     {
