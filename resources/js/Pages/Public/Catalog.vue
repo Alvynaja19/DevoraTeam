@@ -111,7 +111,8 @@
             <div v-for="book in books.data" :key="book.id" class="pub-book-card">
               <!-- Cover -->
               <div class="pub-book-cover">
-                <img v-if="book.cover_image" :src="`/storage/${book.cover_image}`"
+                <img v-if="book.cover_image" 
+                  :src="book.cover_image.startsWith('http') ? book.cover_image : '/' + book.cover_image"
                   :alt="book.title" class="pub-book-img" />
                 <div v-else class="pub-book-placeholder">
                   <svg width="28" height="28" fill="none" viewBox="0 0 24 24">

@@ -125,11 +125,24 @@
             <tr v-if="books.data && books.data.length > 0" v-for="(book, index) in books.data" :key="book.id" class="hover:bg-gray-50 transition-colors">
               <td class="px-3 md:px-6 py-3 md:py-4 text-sm font-medium text-gray-900">{{ books.from + index }}</td>
               <td class="px-3 md:px-6 py-3 md:py-4">
-                <div class="w-10 h-14 rounded overflow-hidden flex-shrink-0 flex items-center justify-center shadow-sm"
-                     :style="`background: linear-gradient(135deg, ${coverGradient(book.category_id)})`">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" class="opacity-50">
-                    <path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
+                <div class="w-10 h-14 rounded overflow-hidden flex-shrink-0 shadow-sm">
+                  <!-- Tampil gambar cover jika ada -->
+                  <img
+                    v-if="book.cover_image"
+                    :src="book.cover_image.startsWith('http') ? book.cover_image : '/' + book.cover_image"
+                    :alt="book.title"
+                    class="w-full h-full object-cover"
+                  />
+                  <!-- Fallback: gradient placeholder -->
+                  <div
+                    v-else
+                    class="w-full h-full flex items-center justify-center"
+                    :style="`background: linear-gradient(135deg, ${coverGradient(book.category_id)})`"
+                  >
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" class="opacity-50">
+                      <path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
                 </div>
               </td>
               <td class="px-3 md:px-6 py-3 md:py-4">
@@ -461,6 +474,45 @@
           </button>
         </div>
         <form @submit.prevent="submitBookForm" class="px-6 py-5 overflow-y-auto space-y-5">
+
+          <!-- ── Sampul Buku ── -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Sampul Buku</label>
+            <div class="flex items-start gap-4">
+              <!-- Preview -->
+              <div class="shrink-0">
+                <div v-if="coverPreview || currentEditCover"
+                  class="relative w-20 h-28 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                  <img :src="coverPreview || currentEditCover" alt="Sampul" class="w-full h-full object-cover" />
+                  <button type="button" @click="removeCoverInModal"
+                    class="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center shadow"
+                    title="Hapus sampul">✕</button>
+                </div>
+                <div v-else
+                  class="w-20 h-28 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 text-[10px] gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span>Belum ada</span>
+                </div>
+              </div>
+              <!-- Upload button -->
+              <div class="flex-1 space-y-1.5">
+                <label for="modal-cover-upload"
+                  class="inline-flex items-center gap-2 cursor-pointer px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  {{ coverPreview || currentEditCover ? 'Ganti Sampul' : 'Upload Sampul' }}
+                </label>
+                <input id="modal-cover-upload" type="file" accept="image/jpeg,image/png,image/webp"
+                  class="hidden" @change="onModalCoverChange" />
+                <p class="text-xs text-gray-400">JPG, PNG, WEBP · Maks. 2 MB</p>
+                <div v-if="bookForm.errors.cover_image" class="text-xs text-red-500">{{ bookForm.errors.cover_image }}</div>
+              </div>
+            </div>
+          </div>
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Judul Buku <span class="text-red-500">*</span></label>
@@ -620,16 +672,44 @@ function submitImport() {
 }
 
 // ── Create / Edit Book Modal ──────────────────────────────
-const bookFormModal = ref(false)
-const editingBook = ref(null)
+const bookFormModal  = ref(false)
+const editingBook    = ref(null)
+const coverPreview   = ref(null)
+const currentEditCover = ref(null)
+
 const bookForm = useForm({
   title: '', author: '', category_id: '', isbn: '',
   publisher: '', classification_number: '', city: '',
-  year: '', acquisition_type: '', inventory_year: '', description: ''
+  year: '', acquisition_type: '', inventory_year: '', description: '',
+  cover_image: null,
+  remove_cover: false,
 })
+
+function onModalCoverChange(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  bookForm.cover_image = file
+  bookForm.remove_cover = false
+  coverPreview.value = URL.createObjectURL(file)
+}
+
+function removeCoverInModal() {
+  bookForm.cover_image = null
+  bookForm.remove_cover = true
+  coverPreview.value = null
+  currentEditCover.value = null
+  const input = document.getElementById('modal-cover-upload')
+  if (input) input.value = ''
+}
 
 function openBookForm(book = null) {
   editingBook.value = book
+  coverPreview.value = null
+  bookForm.remove_cover = false
+  bookForm.cover_image = null
+  const input = document.getElementById('modal-cover-upload')
+  if (input) input.value = ''
+
   if (book) {
     bookForm.title = book.title || ''
     bookForm.author = book.author || ''
@@ -642,8 +722,17 @@ function openBookForm(book = null) {
     bookForm.acquisition_type = book.acquisition_type || ''
     bookForm.inventory_year = book.inventory_year || ''
     bookForm.description = book.description || ''
+    // Set cover saat ini
+    if (book.cover_image) {
+      currentEditCover.value = book.cover_image.startsWith('http')
+        ? book.cover_image
+        : '/' + book.cover_image
+    } else {
+      currentEditCover.value = null
+    }
   } else {
     bookForm.reset()
+    currentEditCover.value = null
   }
   bookForm.clearErrors()
   bookFormModal.value = true
@@ -651,12 +740,13 @@ function openBookForm(book = null) {
 
 function submitBookForm() {
   if (editingBook.value) {
-    bookForm.put(route('books.update', editingBook.value.id), {
-      onSuccess: () => { bookFormModal.value = false; bookForm.reset() },
-    })
+    bookForm.transform(data => ({ ...data, _method: 'PUT' }))
+      .post(route('books.update', editingBook.value.id), {
+        onSuccess: () => { bookFormModal.value = false; bookForm.reset(); coverPreview.value = null; currentEditCover.value = null },
+      })
   } else {
     bookForm.post(route('books.store'), {
-      onSuccess: () => { bookFormModal.value = false; bookForm.reset() },
+      onSuccess: () => { bookFormModal.value = false; bookForm.reset(); coverPreview.value = null },
     })
   }
 }

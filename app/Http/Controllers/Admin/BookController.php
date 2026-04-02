@@ -69,7 +69,17 @@ class BookController extends Controller
             'pages'       => 'nullable|integer|min:1',
             'description' => 'nullable|string',
             'rack_number' => 'nullable|string|max:20',
+            'cover_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        if ($request->hasFile('cover_image')) {
+            $file     = $request->file('cover_image');
+            $filename = uniqid('cover_') . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('covers'), $filename);
+            $data['cover_image'] = 'covers/' . $filename;
+        } else {
+            unset($data['cover_image']);
+        }
 
         $book = Book::create($data);
         return redirect()->route('books.index')->with('success', 'Buku berhasil ditambahkan.');
@@ -96,7 +106,30 @@ class BookController extends Controller
             'pages'       => 'nullable|integer|min:1',
             'description' => 'nullable|string',
             'rack_number' => 'nullable|string|max:20',
+            'cover_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'remove_cover' => 'nullable|boolean',
         ]);
+
+        // Hapus cover jika diminta
+        if ($request->boolean('remove_cover') && $book->cover_image) {
+            if (!str_starts_with($book->cover_image, 'http')) {
+                $oldPath = public_path($book->cover_image);
+                if (file_exists($oldPath)) unlink($oldPath);
+            }
+            $data['cover_image'] = null;
+        } elseif ($request->hasFile('cover_image')) {
+            // Hapus file lama jika bukan URL
+            if ($book->cover_image && !str_starts_with($book->cover_image, 'http')) {
+                $oldPath = public_path($book->cover_image);
+                if (file_exists($oldPath)) unlink($oldPath);
+            }
+            $file     = $request->file('cover_image');
+            $filename = uniqid('cover_') . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('covers'), $filename);
+            $data['cover_image'] = 'covers/' . $filename;
+        } else {
+            unset($data['cover_image']);
+        }
 
         $book->update($data);
         return redirect()->route('books.index')->with('success', 'Data buku diperbarui.');
