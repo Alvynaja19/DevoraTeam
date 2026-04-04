@@ -23,6 +23,7 @@ class PublicController extends Controller
 
         // 8 buku populer
         $popularBooks = Book::with('category')
+            ->withCount(['copies as available_count' => fn($q) => $q->where('status', 'tersedia')->where('condition', '!=', 'hilang')])
             ->popular()
             ->limit(8)
             ->get()
@@ -31,10 +32,8 @@ class PublicController extends Controller
                 'title'           => $b->title,
                 'author'          => $b->author,
                 'cover_image'     => $b->cover_image,
-                'avg_rating'      => $b->avg_rating,
                 'total_loans'     => $b->total_loans,
-                'category'        => $b->category?->name,
-                'available_count' => $b->availableCopies()->count(),
+                'available_count' => $b->available_count,
             ]);
 
         // Semua kategori dengan jumlah buku
@@ -101,7 +100,6 @@ class PublicController extends Controller
                 'publisher'       => $b->publisher,
                 'year'            => $b->year,
                 'cover_image'     => $b->cover_image,
-                'avg_rating'      => $b->avg_rating,
                 'total_loans'     => $b->total_loans,
                 'rack_number'     => $b->rack_number,
                 'category'        => $b->category?->name,

@@ -10,6 +10,7 @@ class BookApiController extends Controller
     public function index(Request $request)
     {
         $books = \App\Models\Book::with('category', 'copies')
+            ->withCount(['copies as available_count' => fn($q) => $q->where('status', 'tersedia')->where('condition', '!=', 'hilang')])
             ->latest()
             ->get()
             ->map(function($book) {
@@ -21,9 +22,8 @@ class BookApiController extends Controller
                     'publisher' => $book->publisher,
                     'category' => ['name' => $book->category?->name ?? 'Uncategorized'],
                     'synopsis' => $book->description,
-                    'avg_rating' => $book->avg_rating ?? 4.5,
                     'pages' => $book->pages ?? 0,
-                    'stock' => $book->availableCopies()->count(),
+                    'stock' => $book->available_count,
                     'loan_count' => $book->total_loans ?? 0,
                 ];
             });
@@ -35,7 +35,9 @@ class BookApiController extends Controller
 
     public function show($id)
     {
-        $book = \App\Models\Book::with('category', 'copies')->findOrFail($id);
+        $book = \App\Models\Book::with('category', 'copies')
+            ->withCount(['copies as available_count' => fn($q) => $q->where('status', 'tersedia')->where('condition', '!=', 'hilang')])
+            ->findOrFail($id);
         
         return response()->json([
             'data' => [
@@ -46,9 +48,8 @@ class BookApiController extends Controller
                 'publisher' => $book->publisher,
                 'category' => ['name' => $book->category?->name ?? 'Uncategorized'],
                 'synopsis' => $book->description,
-                'avg_rating' => $book->avg_rating ?? 4.5,
                 'pages' => $book->pages ?? 0,
-                'stock' => $book->availableCopies()->count(),
+                'stock' => $book->available_count,
                 'loan_count' => $book->total_loans ?? 0,
             ]
         ]);

@@ -25,7 +25,6 @@ class BookController extends Controller
                 'copies as available_copies' => fn($q) => $q->where('status', 'tersedia'),
                 'copies as borrowed_copies'  => fn($q) => $q->where('status', 'dipinjam'),
             ])
-            ->withAvg('ratings', 'rating')
             ->when($search, fn($q, $s) => $q->where(fn($q2) =>
                 $q2->where('title',  'like', "%{$s}%")
                    ->orWhere('author', 'like', "%{$s}%")

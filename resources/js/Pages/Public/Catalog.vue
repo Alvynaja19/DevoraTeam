@@ -132,9 +132,6 @@
                     {{ book.available_count > 0 ? 'Tersedia' : 'Dipinjam' }}
                   </span>
                 </div>
-                <div v-if="book.avg_rating" class="pub-book-rating">
-                  <span>★</span> {{ Number(book.avg_rating).toFixed(1) }}
-                </div>
               </div>
             </div>
           </div>
@@ -562,14 +559,6 @@ function getCategoryName(id) {
 
 .pub-avail.avail { background: #dcfce7; color: #15803d; }
 .pub-avail.borr  { background: #fee2e2; color: #b91c1c; }
-
-.pub-book-rating {
-  font-size: 12px;
-  font-weight: 600;
-  color: #92400e;
-}
-
-.pub-book-rating span { color: #f59e0b; }
 
 /* Empty State */
 .pub-empty {

@@ -45,7 +45,6 @@ class EbookApiController extends Controller
                     'publisher' => $item['publisher'] ?? '-',
                     'category' => ['name' => 'E-Book (Internet Archive)'],
                     'synopsis' => $description,
-                    'avg_rating' => 4.5,
                     'pages' => $item['imagecount'] ?? 0,
                     'stock' => 999, // Infinite for e-books
                     'web_reader' => "https://archive.org/embed/{$identifier}?ui=embed",

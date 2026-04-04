@@ -90,7 +90,7 @@ class GeminiService
         foreach ($books as $i => $book) {
             $num = $i + 1;
             $bookList .= "{$num}. \"{$book['title']}\" oleh {$book['author']} " .
-                "(Kategori: {$book['category']}, Rating: {$book['rating']}, " .
+                "(Kategori: {$book['category']}, " .
                 "Pinjaman: {$book['loans']}x, Stok: {$book['stock']})" .
                 ($book['description'] ? " — {$book['description']}" : '') . "\n";
         }

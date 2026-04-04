@@ -147,7 +147,6 @@ class ChatbotApiController extends Controller
             'title'       => $book->title,
             'author'      => $book->author,
             'category'    => $book->category?->name ?? 'Uncategorized',
-            'rating'      => $book->avg_rating ?? 0,
             'loans'       => $book->total_loans ?? 0,
             'stock'       => $book->availableCopies()->count(),
             'description' => Str::limit($book->description, 70),
@@ -171,7 +170,6 @@ class ChatbotApiController extends Controller
                 ? (str_starts_with($book->cover_image, 'http') ? $book->cover_image : asset($book->cover_image)) 
                 : null,
             'category'    => $book->category?->name ?? 'Uncategorized',
-            'avg_rating'  => $book->avg_rating ?? 0,
         ])->toArray();
 
         // 7. Simpan jawaban bot
@@ -238,7 +236,7 @@ class ChatbotApiController extends Controller
                     }
                 });
             }
-            return $q->orderByDesc('avg_rating')->orderByDesc('total_loans')->take(20)->get();
+            return $q->orderByDesc('total_loans')->take(20)->get();
         };
 
         $results = $buildQuery(true);
@@ -251,7 +249,7 @@ class ChatbotApiController extends Controller
         
         // Terakhir: Jika database ini sama sekali tidak ada yang nyantol
         if ($results->isEmpty()) {
-             return Book::with('category')->orderByDesc('total_loans')->orderByDesc('avg_rating')->take(20)->get();
+             return Book::with('category')->orderByDesc('total_loans')->take(20)->get();
         }
 
         return $results;

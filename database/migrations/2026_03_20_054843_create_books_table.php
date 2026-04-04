@@ -23,7 +23,6 @@ return new class extends Migration
             $table->string('cover_image', 255)->nullable();
             $table->string('rack_number', 20)->nullable()->comment('Nomor rak lokasi fisik buku');
             $table->smallInteger('total_copies')->unsigned()->default(0)->comment('Auto via trigger');
-            $table->decimal('avg_rating', 3, 2)->default(0.00)->comment('Auto via trigger');
             $table->integer('total_loans')->unsigned()->default(0)->comment('Counter popularitas');
             $table->timestamps();
 
