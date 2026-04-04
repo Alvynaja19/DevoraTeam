@@ -11,7 +11,7 @@
         </p>
         <div class="hero-actions">
           <Link :href="route('catalog')" class="btn-primary">Jelajahi Katalog</Link>
-          <Link :href="route('register')" class="btn-ghost">Daftar Akun →</Link>
+          <Link v-if="!$page.props.auth.user" :href="route('register')" class="btn-ghost">Daftar Akun →</Link>
         </div>
         <div class="hero-stats">
           <div class="stat-item">
@@ -119,7 +119,7 @@
         <h2>Mulai Membaca Hari Ini</h2>
         <p>Bergabung dengan {{ formatNum(stats.total_members) }} anggota aktif dan akses {{ formatNum(stats.total_books) }}+ koleksi buku di perpustakaan kami.</p>
       </div>
-      <Link :href="route('register')" class="btn-white">Bergabung Sekarang →</Link>
+      <Link v-if="!$page.props.auth.user" :href="route('register')" class="btn-white">Bergabung Sekarang →</Link>
     </div>
   </PublicLayout>
 </template>

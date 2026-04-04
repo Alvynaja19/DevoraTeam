@@ -68,6 +68,12 @@
                       <p class="text-xs text-[#8a9490]">Masuk sebagai</p>
                       <p class="text-sm font-semibold text-[#1a1f1c] truncate">{{ $page.props.auth.user.name }}</p>
                     </div>
+                    <MenuItem v-slot="{ active }" v-if="['admin', 'petugas'].includes($page.props.auth.user.role)">
+                      <Link :href="route('dashboard')"
+                        :class="[active ? 'bg-[#f0faf4]' : '', 'flex items-center gap-2 px-4 py-2.5 text-sm text-[#4a5250] transition-colors']">
+                        📊 Dashboard Menu
+                      </Link>
+                    </MenuItem>
                     <MenuItem v-slot="{ active }">
                       <Link :href="route('catalog')"
                         :class="[active ? 'bg-[#f0faf4]' : '', 'flex items-center gap-2 px-4 py-2.5 text-sm text-[#4a5250] transition-colors']">
@@ -202,10 +208,14 @@ const navigation = computed(() => {
     { name: 'Katalog', href: route('catalog'), key: 'catalog' },
   ]
   if (isLoggedIn.value) {
-    try {
-      base.push({ name: 'Profil Saya', href: route('anggota.profile'), key: 'anggota' })
-    } catch (_) {
-      base.push({ name: 'Profil Saya', href: '/anggota/profile', key: 'anggota' })
+    if (['admin', 'petugas'].includes(page.props.auth.user.role)) {
+      base.push({ name: 'Dashboard', href: route('dashboard'), key: 'dashboard' })
+    } else {
+      try {
+        base.push({ name: 'Profil Saya', href: route('anggota.profile'), key: 'anggota' })
+      } catch (_) {
+        base.push({ name: 'Profil Saya', href: '/anggota/profile', key: 'anggota' })
+      }
     }
   }
   return base
