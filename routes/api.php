@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\LoanApiController;
 use App\Http\Controllers\Api\NotificationApiController;
 use App\Http\Controllers\Api\EbookApiController;
 use App\Http\Controllers\Api\VisitApiController;
+use App\Http\Controllers\Api\ChatbotApiController;
 
 // ─── Public API (tanpa auth) ──────────────────────────────────────
 Route::prefix('v1')->group(function () {
@@ -58,6 +59,15 @@ Route::prefix('v1')->group(function () {
             Route::put('/bookmarks/{id}/favorite',    [EbookApiController::class, 'toggleFavorite']);
             Route::get('/progress/{source}/{id}',     [EbookApiController::class, 'getProgress']);
             Route::post('/progress',                  [EbookApiController::class, 'saveProgress']);
+        });
+
+        // Chatbot AI
+        Route::prefix('chatbot')->group(function () {
+            Route::get('/conversations',              [ChatbotApiController::class, 'conversations']);
+            Route::post('/conversations',             [ChatbotApiController::class, 'createConversation']);
+            Route::delete('/conversations/{id}',      [ChatbotApiController::class, 'deleteConversation']);
+            Route::get('/conversations/{id}/messages', [ChatbotApiController::class, 'messages']);
+            Route::post('/send',                      [ChatbotApiController::class, 'send']);
         });
     });
 });
