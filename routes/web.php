@@ -46,9 +46,6 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class , 'logout'])->name('logout');
 
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class , 'index'])->name('dashboard');
-
     Route::middleware('role:anggota')->prefix('anggota')->name('anggota.')->group(function () {
         Route::get('/profile', [ProfileController::class , 'show'])->name('profile');
         Route::put('/profile', [ProfileController::class , 'update'])->name('profile.update');
@@ -56,6 +53,9 @@ Route::middleware('auth')->group(function () {
 
         // ── Admin & Petugas ──────────────────────────────────────────────────
         Route::middleware('role:admin|petugas')->group(function () {
+
+            // Dashboard
+            Route::get('/dashboard', [DashboardController::class , 'index'])->name('dashboard');
 
             // Members
             Route::get('/members/create', [MemberController::class , 'create'])->name('members.create');
