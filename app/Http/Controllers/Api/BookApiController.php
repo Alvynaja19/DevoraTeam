@@ -24,6 +24,7 @@ class BookApiController extends Controller
                     'avg_rating' => $book->avg_rating ?? 4.5,
                     'pages' => $book->pages ?? 0,
                     'stock' => $book->availableCopies()->count(),
+                    'loan_count' => $book->total_loans ?? 0,
                 ];
             });
 
@@ -48,6 +49,7 @@ class BookApiController extends Controller
                 'avg_rating' => $book->avg_rating ?? 4.5,
                 'pages' => $book->pages ?? 0,
                 'stock' => $book->availableCopies()->count(),
+                'loan_count' => $book->total_loans ?? 0,
             ]
         ]);
     }
