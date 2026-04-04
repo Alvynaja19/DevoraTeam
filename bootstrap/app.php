@@ -25,6 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Spatie\Permission\Exceptions\UnauthorizedException $e, $request) {
+            if ($request->wantsJson() && !$request->hasHeader('X-Inertia')) {
+                return response()->json(['message' => 'Akses ditolak!'], 403);
+            }
+            
+            return redirect()->route('home')->with('error', 'Akses ditolak! Halaman tersebut khusus Admin dan Petugas.');
+        });
     })->create();
 
