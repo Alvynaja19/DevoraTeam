@@ -133,12 +133,23 @@ class MemberController extends Controller
             ->when($request->status,   fn($q, $s) => $q->where('status', $s))
             ->when($request->type,     fn($q, $t) => $q->where('type', $t))
             ->when($request->class_id, fn($q, $c) => $q->where('class_id', $c))
-            ->latest()->paginate($perPage)->withQueryString();
+            ->when($request->type, fn($q) => $q->orderBy('name', 'asc'))
+            ->when(!$request->type, fn($q) => $q->orderBy('id', 'desc'))
+            ->paginate($perPage)->withQueryString();
+
+        $typeCounts = Member::selectRaw('type, COUNT(*) as total')
+            ->when($request->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%")->orWhere('member_code', 'like', "%{$s}%"))
+            ->when($request->status, fn($q, $s) => $q->where('status', $s))
+            ->when($request->class_id, fn($q, $c) => $q->where('class_id', $c))
+            ->groupBy('type')
+            ->pluck('total', 'type')
+            ->toArray();
 
         return Inertia::render('Admin/Members/Index', [
-            'members'  => $members,
-            'filters'  => $request->only(['search', 'status', 'type', 'class_id', 'per_page']),
-            'classes'  => Kelas::aktif()->orderBy('name')->get(['id', 'name']),
+            'members'    => $members,
+            'filters'    => $request->only(['search', 'status', 'type', 'class_id', 'per_page']),
+            'classes'    => Kelas::aktif()->orderBy('name')->get(['id', 'name']),
+            'typeCounts' => $typeCounts,
         ]);
     }
 

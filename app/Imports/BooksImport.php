@@ -18,7 +18,7 @@ class BooksImport implements ToCollection, WithHeadingRow
      */
     public function collection(Collection $rows)
     {
-        $defaultCategory = Category::firstOrCreate(['name' => 'Umum', 'code' => 'UMM']);
+        $defaultCategory = Category::firstOrCreate(['name' => 'Non Fiksi', 'code' => 'NONFIKSI']);
 
         foreach ($rows as $collectionRow) {
             $row = $collectionRow->toArray();

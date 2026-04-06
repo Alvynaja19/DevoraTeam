@@ -86,9 +86,9 @@
             <option value="habis">Habis</option>
           </select>
 
-          <select v-model="filters.availability" @change="applyFilter"
+          <select v-model="filters.sort" @change="applyFilter"
             class="w-full md:w-auto px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
-            <option value="" selected>Urutkan: Terbaru</option>
+            <option value="">Urutkan: Terbaru</option>
             <option value="terpopuler">Terpopuler</option>
             <option value="judul">Judul A-Z</option>
           </select>

@@ -213,12 +213,10 @@ class ChatbotApiController extends Controller
             $matchedCategoryId = \App\Models\Category::where('name', 'Non Fiksi')->value('id');
         } elseif (str_contains($lowerMessage, 'fiksi')) {
             $matchedCategoryId = \App\Models\Category::where('name', 'Fiksi')->value('id');
-        } elseif (str_contains($lowerMessage, 'umum')) {
-            $matchedCategoryId = \App\Models\Category::where('name', 'Umum')->value('id');
         }
 
         // Hapus kata bising agar tidak mengacaukan pencarian judul
-        $filteredKeywords = array_filter($keywords, fn($kw) => !in_array($kw, ['non', 'fiksi', 'umum', 'jumlah', 'berapa', 'total']));
+        $filteredKeywords = array_filter($keywords, fn($kw) => !in_array($kw, ['non', 'fiksi', 'jumlah', 'berapa', 'total']));
         $filteredKeywords = array_values($filteredKeywords);
 
         $buildQuery = function ($useKeywords) use ($matchedCategoryId, $filteredKeywords) {
