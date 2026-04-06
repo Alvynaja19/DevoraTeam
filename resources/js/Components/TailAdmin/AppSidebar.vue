@@ -106,6 +106,8 @@ import SettingsIcon from '@/Components/TailAdminIcons/SettingsIcon.vue'
 import TableIcon from '@/Components/TailAdminIcons/TableIcon.vue'
 import ListIcon from '@/Components/TailAdminIcons/ListIcon.vue'
 import HorizontalDots from '@/Components/TailAdminIcons/HorizontalDots.vue'
+import BarChartIcon from '@/Components/TailAdminIcons/BarChartIcon.vue'
+import PieChartIcon from '@/Components/TailAdminIcons/PieChartIcon.vue'
 
 const page = usePage()
 const { isExpanded, isMobileOpen, isHovered } = useSidebar()
@@ -125,6 +127,13 @@ const menuGroups = computed(() => [
       { name: 'Presensi', route: 'visits.index', icon: UserGroupIcon },
       { name: 'Riwayat', route: 'history.index', icon: ListIcon },
       { name: 'Denda', route: 'fines.index', icon: FineIcon },
+    ],
+  },
+  {
+    title: 'Laporan',
+    items: [
+      { name: 'Laporan Denda', route: 'reports.fines', icon: BarChartIcon },
+      { name: 'Laporan Presensi', route: 'reports.attendance', icon: PieChartIcon },
     ],
   },
   {

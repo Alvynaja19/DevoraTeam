@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ReturnController;
 use App\Http\Controllers\Admin\FineController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\VisitController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\Anggota\ProfileController;
 
@@ -109,6 +110,10 @@ Route::middleware('auth')->group(function () {
 
             // Kelas
             Route::resource('kelas', KelasController::class)->only(['index', 'store', 'update', 'destroy']);
+
+            // Laporan
+            Route::get('/laporan/denda', [ReportController::class, 'fineReport'])->name('reports.fines');
+            Route::get('/laporan/presensi', [ReportController::class, 'attendanceReport'])->name('reports.attendance');
 
         // Settings (admin only)
         Route::middleware('role:admin')->group(function () {
