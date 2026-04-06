@@ -189,6 +189,17 @@
 
             <div class="form-divider" />
 
+            <!-- Email -->
+            <div class="form-group">
+              <label class="form-label">
+                Email
+                <span class="label-hint">(akan digunakan untuk login)</span>
+              </label>
+              <input v-model="form.email" type="email" placeholder="contoh@email.com"
+                class="form-input" />
+              <p v-if="form.errors?.email" class="form-error">{{ form.errors.email }}</p>
+            </div>
+
             <!-- No. HP -->
             <div class="form-group">
               <label class="form-label">Nomor HP</label>
@@ -303,6 +314,7 @@ watch(activeTab, async (tab) => {
 
 // Inertia form
 const form = useForm({
+  email:   user.email || '',
   phone:   props.member?.phone   || '',
   nis_nip: props.member?.nis_nip || '',
   address: props.member?.address || '',
