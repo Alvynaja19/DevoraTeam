@@ -25,6 +25,32 @@
       {{ $page.props.flash.error }}
     </div>
 
+    <!-- ── Tab Type Anggota ── -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-4 overflow-hidden">
+      <div class="flex border-b border-gray-200 overflow-x-auto">
+        <button
+          v-for="tab in typeTabs"
+          :key="tab.value"
+          @click="switchTab(tab.value)"
+          class="relative flex items-center gap-2 px-5 py-3.5 text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0"
+          :class="activeType === tab.value
+            ? 'text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/50'
+            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 border-b-2 border-transparent'"
+        >
+          <component :is="tab.icon" class="w-4 h-4 flex-shrink-0" />
+          {{ tab.label }}
+          <span
+            class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold"
+            :class="activeType === tab.value
+              ? 'bg-emerald-500 text-white'
+              : 'bg-gray-100 text-gray-500'"
+          >
+            {{ tab.value === '' ? totalAllCount : (typeCounts[tab.value] || 0) }}
+          </span>
+        </button>
+      </div>
+    </div>
+
     <!-- Filter & Search -->
     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row gap-4 items-center justify-between">
       <div class="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
@@ -49,18 +75,10 @@
           <option value="ditolak">Ditolak</option>
         </select>
 
-        <select v-model="filters.class_id" @change="applyFilter"
+        <select v-if="activeType === '' || activeType === 'siswa'" v-model="filters.class_id" @change="applyFilter"
           class="w-full md:w-auto px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
           <option value="">Semua Kelas</option>
           <option v-for="c in classes" :key="c.id" :value="c.id">{{ c.name }}</option>
-        </select>
-
-        <select v-model="filters.type" @change="applyFilter"
-          class="w-full md:w-auto px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
-          <option value="">Semua Tipe</option>
-          <option value="siswa">Siswa</option>
-          <option value="guru">Guru / Karyawan</option>
-          <option value="umum">Umum</option>
         </select>
 
         <div class="relative w-full md:w-96">
@@ -83,8 +101,8 @@
             <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">No</th>
             <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Anggota</th>
             <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Kode</th>
-            <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Tipe</th>
-            <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Kelas</th>
+            <th v-if="activeType === ''" class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Tipe</th>
+            <th v-if="activeType === '' || activeType === 'siswa'" class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Kelas</th>
             <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Status</th>
             <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Bergabung</th>
             <th class="px-3 md:px-6 py-3 text-xs font-bold tracking-wider text-left text-gray-700 uppercase">Aksi</th>
@@ -95,7 +113,8 @@
             <td class="px-3 md:px-6 py-3 md:py-4 text-sm font-medium text-gray-900">{{ (members.from || 1) + i }}</td>
             <td class="px-3 md:px-6 py-3 md:py-4">
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 bg-gradient-to-br from-emerald-500 to-emerald-600">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                  :class="m.type === 'siswa' ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 'bg-gradient-to-br from-emerald-500 to-emerald-600'">
                   {{ m.name[0].toUpperCase() }}
                 </div>
                 <div>
@@ -105,13 +124,15 @@
               </div>
             </td>
             <td class="px-3 md:px-6 py-3 md:py-4 font-mono text-sm text-gray-500">{{ m.member_code }}</td>
-            <td class="px-3 md:px-6 py-3 md:py-4">
+            <!-- Kolom Tipe: hanya tampil di tab "Semua" -->
+            <td v-if="activeType === ''" class="px-3 md:px-6 py-3 md:py-4">
               <span class="px-2 py-1 text-xs font-semibold rounded-full"
-                :class="{ 'bg-blue-100 text-blue-700': m.type === 'siswa', 'bg-green-100 text-green-700': m.type === 'guru', 'bg-gray-100 text-gray-600': m.type === 'umum' }">
-                {{ m.type }}
+                :class="{ 'bg-blue-100 text-blue-700': m.type === 'siswa', 'bg-emerald-100 text-emerald-700': m.type === 'guru', 'bg-gray-100 text-gray-600': m.type === 'umum' }">
+                {{ m.type === 'guru' ? 'Guru/Karyw.' : m.type }}
               </span>
             </td>
-            <td class="px-3 md:px-6 py-3 md:py-4 text-sm text-gray-600">{{ m.kelas?.name || '-' }}</td>
+            <!-- Kolom Kelas: tampil di "Semua" dan "Siswa" -->
+            <td v-if="activeType === '' || activeType === 'siswa'" class="px-3 md:px-6 py-3 md:py-4 text-sm text-gray-600">{{ m.kelas?.name || '-' }}</td>
             <td class="px-3 md:px-6 py-3 md:py-4">
               <span class="px-2 py-1 text-xs font-semibold rounded-full"
                 :class="{
@@ -138,7 +159,7 @@
             <td colspan="8" class="px-6 py-16 text-center">
               <svg width="40" height="40" fill="none" viewBox="0 0 24 24" class="mx-auto mb-3 text-gray-300"><path stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg>
               <div class="text-gray-500 font-medium">Belum ada anggota ditemukan</div>
-              <p class="text-sm text-gray-400 mt-1">Gunakan filter atau cari dengan kata kunci lain</p>
+              <p class="text-sm text-gray-400 mt-1">Coba filter lain atau tambah anggota baru</p>
             </td>
           </tr>
         </tbody>
@@ -343,7 +364,8 @@
       <div class="bg-white rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold bg-gradient-to-br from-emerald-500 to-emerald-600">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold"
+              :class="selectedMember?.type === 'siswa' ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 'bg-gradient-to-br from-emerald-500 to-emerald-600'">
               {{ selectedMember?.name[0].toUpperCase() }}
             </div>
             <div>
@@ -470,24 +492,94 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, computed, watch, h } from 'vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/TailAdminLayout.vue'
 
-const props = defineProps({ members: Object, filters: Object, classes: Array })
+const props = defineProps({
+  members: Object,
+  filters: Object,
+  classes: Array,
+  typeCounts: Object,
+})
 
-// ── Filters ──
+// ── Tab Definitions ──
+const typeTabs = [
+  {
+    value: '',
+    label: 'Semua',
+    icon: {
+      render() {
+        return h('svg', { width: '16', height: '16', fill: 'none', viewBox: '0 0 24 24' }, [
+          h('path', { d: 'M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z', stroke: 'currentColor', 'stroke-width': '1.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+        ])
+      }
+    }
+  },
+  {
+    value: 'siswa',
+    label: 'Siswa',
+    icon: {
+      render() {
+        return h('svg', { width: '16', height: '16', fill: 'none', viewBox: '0 0 24 24' }, [
+          h('path', { d: 'M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 10.741-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5', stroke: 'currentColor', 'stroke-width': '1.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+        ])
+      }
+    }
+  },
+  {
+    value: 'guru',
+    label: 'Guru / Karyawan',
+    icon: {
+      render() {
+        return h('svg', { width: '16', height: '16', fill: 'none', viewBox: '0 0 24 24' }, [
+          h('path', { d: 'M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z', stroke: 'currentColor', 'stroke-width': '1.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+        ])
+      }
+    }
+  },
+  {
+    value: 'umum',
+    label: 'Umum',
+    icon: {
+      render() {
+        return h('svg', { width: '16', height: '16', fill: 'none', viewBox: '0 0 24 24' }, [
+          h('path', { d: 'M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z', stroke: 'currentColor', 'stroke-width': '1.5', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })
+        ])
+      }
+    }
+  },
+]
+
+// ── State ──
+const activeType = ref(props.filters?.type || '')
+
 const filters = reactive({
   search:   props.filters?.search   || '',
   status:   props.filters?.status   || '',
-  type:     props.filters?.type     || '',
   class_id: props.filters?.class_id || '',
 })
 const perPage = ref(props.filters?.per_page || 20)
 
+// Total semua = jumlah semua typeCounts
+const totalAllCount = computed(() => {
+  return Object.values(props.typeCounts || {}).reduce((sum, v) => sum + Number(v), 0)
+})
+
+// ── Switch Tab ──
+function switchTab(typeValue) {
+  activeType.value = typeValue
+  // Reset class filter jika bukan siswa
+  if (typeValue !== 'siswa' && typeValue !== '') {
+    filters.class_id = ''
+  }
+  applyFilter()
+}
+
 function applyFilter() {
   router.get(route('members.index'), {
     ...filters,
+    type: activeType.value,
     per_page: perPage.value,
   }, { preserveState: true, replace: true })
 }
@@ -515,7 +607,7 @@ const addForm = useForm({
 function openAddModal() {
   editingMember.value = null
   addForm.reset()
-  addForm.type = 'siswa'
+  addForm.type = activeType.value === 'guru' ? 'guru' : 'siswa'
   showAddModal.value = true
 }
 
