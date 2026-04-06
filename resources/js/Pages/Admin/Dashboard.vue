@@ -104,7 +104,7 @@
                 <div class="text-sm font-medium text-slate-800">{{ loan.member?.name }}</div>
                 <div class="text-xs text-red-500 mt-0.5">Jatuh tempo: {{ formatDate(loan.due_date) }}</div>
               </div>
-              <Link :href="route('loans.show', loan.id)" class="btn btn-sm btn-secondary">Lihat</Link>
+              <Link :href="route('history.index', { search: loan.member?.name, status: 'terlambat' })" class="btn btn-sm btn-secondary">Lihat</Link>
             </div>
             <div v-if="overdueLoans.length === 0" class="px-5 py-6 text-center text-sm text-slate-400">
               Tidak ada pinjaman terlambat ✓
