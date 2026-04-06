@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\LoanApiController;
 use App\Http\Controllers\Api\NotificationApiController;
 use App\Http\Controllers\Api\EbookApiController;
 use App\Http\Controllers\Api\VisitApiController;
+use App\Http\Controllers\Api\ReadingProgressController;
 use App\Http\Controllers\Api\ChatbotApiController;
 
 // ─── Public API (tanpa auth) ──────────────────────────────────────
@@ -61,6 +62,9 @@ Route::prefix('v1')->group(function () {
             Route::post('/progress',                  [EbookApiController::class, 'saveProgress']);
         });
 
+        //reading progress
+        Route::get('/reading-progress/{ebookId}', [ReadingProgressController::class, 'get']);
+        Route::post('/reading-progress', [ReadingProgressController::class, 'update']);
         // Chatbot AI
         Route::prefix('chatbot')->group(function () {
             Route::get('/conversations',              [ChatbotApiController::class, 'conversations']);
