@@ -63,9 +63,10 @@ Route::prefix('v1')->group(function () {
         });
 
         //reading progress
+        Route::get('/reading-progress', [ReadingProgressController::class, 'index']);
         Route::get('/reading-progress/{ebookId}', [ReadingProgressController::class, 'get']);
-        Route::post('/reading-progress', [ReadingProgressController::class, 'update']);
-        // Chatbot AI
+        Route::post('/reading-progress/update', [ReadingProgressController::class, 'update']);
+        
         Route::prefix('chatbot')->group(function () {
             Route::get('/conversations',              [ChatbotApiController::class, 'conversations']);
             Route::post('/conversations',             [ChatbotApiController::class, 'createConversation']);

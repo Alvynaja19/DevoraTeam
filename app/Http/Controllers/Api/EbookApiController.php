@@ -15,7 +15,7 @@ class EbookApiController extends Controller
         $response = \Illuminate\Support\Facades\Http::get('https://archive.org/advancedsearch.php', [
             'q' => $iaQuery,
             'output' => 'json',
-            'rows' => 20,
+            'rows' => 50,
             'page' => 1,
         ]);
 

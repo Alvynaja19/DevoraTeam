@@ -15,7 +15,9 @@ return new class extends Migration
         $table->id();
         $table->foreignId('user_id')->constrained()->cascadeOnDelete();
         $table->string('ebook_id'); // dari archive.org
-        $table->integer('progress')->default(0); // 0 - 100
+        $table->integer('progress')->default(0);
+        $table->integer('current_page')->default(0);
+        $table->integer('total_page')->default(0); // 0 - 100
         $table->timestamps();
     });
 }
