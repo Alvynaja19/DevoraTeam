@@ -30,6 +30,15 @@ class AuthApiController extends Controller
         }
 
         $user = User::where('email', $request->email)->firstOrFail();
+
+        // Cek jika anggota masih pending
+        if ($user->role === 'anggota' && $user->member && $user->member->status === 'pending') {
+            Auth::logout();
+            throw ValidationException::withMessages([
+                'email' => ['Akun Anda masih menunggu persetujuan admin. Silakan tunggu konfirmasi.'],
+            ]);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([

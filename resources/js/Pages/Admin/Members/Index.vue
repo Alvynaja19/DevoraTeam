@@ -68,11 +68,9 @@
         <select v-model="filters.status" @change="applyFilter"
           class="w-full md:w-auto px-4 py-2 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500">
           <option value="">Semua Status</option>
-          <option value="pending">Pending</option>
+          <option v-if="activeType === '' || activeType === 'umum'" value="pending">Pending</option>
           <option value="aktif">Aktif</option>
-          <option value="suspended">Suspended</option>
           <option value="nonaktif">Nonaktif</option>
-          <option value="ditolak">Ditolak</option>
         </select>
 
         <select v-if="activeType === '' || activeType === 'siswa'" v-model="filters.class_id" @change="applyFilter"
@@ -572,6 +570,13 @@ function switchTab(typeValue) {
   // Reset class filter jika bukan siswa
   if (typeValue !== 'siswa' && typeValue !== '') {
     filters.class_id = ''
+  }
+  // Reset status filter jika pindah ke tab yang tidak mendukung status tersebut
+  if ((typeValue === 'siswa' || typeValue === 'guru') && ['pending', 'suspended', 'ditolak'].includes(filters.status)) {
+    filters.status = ''
+  }
+  if (['suspended', 'ditolak'].includes(filters.status)) {
+    filters.status = ''
   }
   applyFilter()
 }

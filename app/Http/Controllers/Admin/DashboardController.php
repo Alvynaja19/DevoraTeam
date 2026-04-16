@@ -44,11 +44,29 @@ class DashboardController extends Controller
             ->take(8)
             ->get();
 
+        $popularBooks = DB::table('loan_items')
+            ->join('loans', 'loan_items.loan_id', '=', 'loans.id')
+            ->join('book_copies', 'loan_items.copy_id', '=', 'book_copies.id')
+            ->join('books', 'book_copies.book_id', '=', 'books.id')
+            ->select('books.id', 'books.title', 'books.cover_image', 'books.author', DB::raw('count(loan_items.id) as borrow_count'))
+            ->where('loans.created_at', '>=', now()->startOfWeek())
+            ->groupBy('books.id', 'books.title', 'books.cover_image', 'books.author')
+            ->orderByDesc('borrow_count')
+            ->limit(3)
+            ->get();
+
+        $popularBooks->transform(function ($book) {
+            if ($book->cover_image && !\Illuminate\Support\Str::startsWith($book->cover_image, 'http')) {
+                $book->cover_image = url('storage/' . $book->cover_image);
+            }
+            return $book;
+        });
+
         return Inertia::render('Admin/Dashboard', [
             'stats'        => $stats,
             'recentLoans'  => $recentLoans,
             'overdueLoans' => $overdueLoans,
+            'popularBooks' => $popularBooks,
         ]);
     }
-
 }

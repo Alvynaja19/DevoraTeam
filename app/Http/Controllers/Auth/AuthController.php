@@ -31,9 +31,18 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Email atau password salah.'])->onlyInput('email');
         }
 
+        $user = Auth::user();
+
+        // Cek jika anggota masih pending
+        if ($user->role === 'anggota' && $user->member && $user->member->status === 'pending') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return back()->withErrors(['email' => 'Akun Anda masih menunggu persetujuan admin. Silakan tunggu konfirmasi.'])->onlyInput('email');
+        }
+
         $request->session()->regenerate();
 
-        $user = Auth::user();
         $redirect = $user->role === 'anggota'
             ? route('home')
             : route('dashboard');
@@ -66,9 +75,8 @@ class AuthController extends Controller
         $data['type'] = 'umum';
         $memberService->register($user, $data);
 
-        Auth::login($user);
-
-        return redirect()->route('home')->with('success', 'Registrasi berhasil! Selamat datang di perpustakaan.');
+        // Jangan auto-login, redirect ke login dengan pesan pending
+        return redirect()->route('login')->with('success', 'Registrasi berhasil! Akun Anda sedang menunggu persetujuan admin. Silakan cek kembali nanti.');
     }
 
     // ── Klaim Akun (NIS/NIP) ──

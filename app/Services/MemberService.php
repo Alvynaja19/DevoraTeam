@@ -39,11 +39,14 @@ class MemberService
     }
 
     /**
-     * Registrasi anggota baru (status langsung aktif).
+     * Registrasi anggota baru.
+     * Siswa/Guru = langsung aktif, Umum = pending (menunggu approval admin).
      */
     public function register(User $user, array $data): Member
     {
-        return DB::transaction(function () use ($user, $data) {
+        $isPending = ($data['type'] === 'umum');
+
+        return DB::transaction(function () use ($user, $data, $isPending) {
             $member = Member::create([
                 'user_id'     => $user->id,
                 'class_id'    => $data['class_id'] ?? null,
@@ -54,9 +57,9 @@ class MemberService
                 'nis_nip'     => $data['nis_nip'] ?? null,
                 'phone'       => $data['phone'] ?? null,
                 'address'     => $data['address'] ?? null,
-                'status'      => 'aktif',
-                'verified_at' => now(),
-                'expired_at'  => now()->addYear(),
+                'status'      => $isPending ? 'pending' : 'aktif',
+                'verified_at' => $isPending ? null : now(),
+                'expired_at'  => $isPending ? null : now()->addYear(),
             ]);
 
             $user->assignRole('anggota');
