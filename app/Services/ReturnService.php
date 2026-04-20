@@ -3,16 +3,21 @@
 namespace App\Services;
 
 use App\Models\BookCopy;
+use App\Models\FcmToken;
 use App\Models\Fine;
 use App\Models\Loan;
 use App\Models\LoanItem;
+use App\Models\MemberNotification;
 use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ReturnService
 {
+    public function __construct(private FcmService $fcm) {}
+
     /**
      * Proses pengembalian eksemplar buku berdasarkan barcode.
      * Returns ['loan_item' => LoanItem, 'fines' => Collection]
@@ -23,7 +28,7 @@ class ReturnService
             ->orWhere('copy_code', $barcode)
             ->firstOrFail();
 
-        $loanItem = LoanItem::with('loan')
+        $loanItem = LoanItem::with(['loan.member'])
             ->where('copy_id', $copy->id)
             ->whereNull('returned_at')
             ->latest()
@@ -91,18 +96,72 @@ class ReturnService
 
             // Notifikasi untuk admin/petugas jika ada denda baru
             if ($fines->isNotEmpty()) {
-                $totalFine = $fines->sum('amount');
+                $totalFine  = $fines->sum('amount');
                 $memberName = $loanItem->loan->member->name ?? 'Unknown';
                 \App\Models\AdminNotification::create([
-                    'type' => 'denda_belum_lunas',
-                    'title' => 'Denda Belum Lunas',
+                    'type'    => 'denda_belum_lunas',
+                    'title'   => 'Denda Belum Lunas',
                     'message' => "Terdapat denda baru sebesar Rp" . number_format($totalFine, 0, ',', '.') . " atas nama {$memberName} yang belum dibayar.",
-                    'url' => route('fines.index'),
+                    'url'     => route('fines.index'),
                 ]);
             }
 
             return $fines;
         });
+
+        // ─── Kirim notifikasi ke member (DILUAR transaksi) ───────────────────
+        if ($fines->isNotEmpty()) {
+            $member     = $loanItem->loan->member ?? null;
+            $totalFine  = $fines->sum('amount');
+            $bookTitle  = $loanItem->copy->book->title ?? 'Buku';
+
+            // Rincian jenis denda untuk pesan
+            $fineTypes = $fines->map(fn($f) => match ($f->fine_type) {
+                'keterlambatan' => "keterlambatan {$f->days_late} hari",
+                'kerusakan'     => 'kerusakan buku',
+                'kehilangan'    => 'kehilangan buku',
+                default         => $f->fine_type,
+            })->implode(', ');
+
+            $title = '⚠️ Denda Pengembalian Buku';
+            $body  = "Buku \"{$bookTitle}\" telah dikembalikan dengan denda Rp" .
+                     number_format($totalFine, 0, ',', '.') .
+                     " ({$fineTypes}). Segera lunasi dendamu.";
+
+            if ($member) {
+                // 1. Simpan ke database (tampil di notifikasi in-app)
+                MemberNotification::create([
+                    'member_id'  => $member->id,
+                    'type'       => 'denda_baru',
+                    'title'      => $title,
+                    'body'       => $body,
+                    'data'       => [
+                        'fine_ids'   => $fines->pluck('id')->map(fn($id) => (string) $id)->toArray(),
+                        'total'      => (string) $totalFine,
+                        'loan_id'    => (string) $loanItem->loan_id,
+                    ],
+                    'is_read'    => false,
+                    'sent_at'    => now(),
+                    'created_at' => now(),
+                ]);
+
+                // 2. Kirim FCM push notification ke device member
+                $tokens = FcmToken::where('user_id', $member->user_id ?? null)
+                    ->pluck('token')
+                    ->toArray();
+
+                if (!empty($tokens)) {
+                    $this->fcm->sendMultiple($tokens, $title, $body, [
+                        'type'    => 'denda_baru',
+                        'loan_id' => (string) $loanItem->loan_id,
+                        'total'   => (string) $totalFine,
+                    ]);
+                    Log::info("[ReturnService] FCM denda_baru sent to member {$member->id}, tokens: " . count($tokens));
+                } else {
+                    Log::info("[ReturnService] Member {$member->id} has no FCM token, skipped push.");
+                }
+            }
+        }
 
         return ['loan_item' => $loanItem->fresh(), 'fines' => $fines];
     }
