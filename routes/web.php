@@ -75,6 +75,7 @@ Route::middleware('auth')->group(function () {
             // Books
             Route::post('/books/import', [BookController::class , 'import'])->name('books.import');
             Route::get('/books/{book}/detail', [BookController::class , 'detail'])->name('books.detail');
+            Route::get('/books/print-labels', [BookController::class , 'printLabels'])->name('books.print-labels');
             Route::resource('books', BookController::class)->only(['index', 'store', 'update', 'destroy']);
             Route::post('/books/{book}/copies', [BookController::class , 'storeCopy'])->name('books.copies.store');
             Route::put('/copies/{copy}', [BookController::class , 'updateCopy'])->name('copies.update');

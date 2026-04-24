@@ -52,23 +52,36 @@
           </div>
         </div>
         <div class="card-body space-y-4">
-          <div class="flex gap-2">
-            <input v-model="pinjam.barcode" @keyup.enter="pinjamAddBook" type="text"
-              class="form-input flex-1" placeholder="Scan barcode atau ketik kode buku..." />
-            <button @click="toggleScanner('pinjam-barcode')" type="button"
-              :class="['btn', showScanner === 'pinjam-barcode' ? 'btn-secondary' : 'btn-outline']">
-              📷 {{ showScanner === 'pinjam-barcode' ? 'Tutup' : 'Kamera' }}
-            </button>
+
+          <!-- Big Camera Scan Button (Primary) -->
+          <div v-if="showScanner !== 'pinjam-barcode'" class="scan-btn-area" @click="openBookScanner">
+            <div class="scan-icon">
+              <svg width="36" height="36" fill="none" viewBox="0 0 24 24">
+                <path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75H13.5V13.5ZM13.5 18.75h.75v.75H13.5v-.75ZM18.75 13.5h.75v.75h-.75V13.5ZM18.75 18.75h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75V16.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="scan-label">Tap untuk Scan Barcode Buku</div>
+            <div class="scan-sublabel">Arahkan kamera ke barcode buku</div>
+          </div>
+
+          <!-- Camera Scanner (terbuka saat aktif) -->
+          <CameraScanner type="barcode" :active="showScanner === 'pinjam-barcode'"
+            @scanned="v => { pinjam.barcode = v; showScanner = ''; pinjamAddBook() }"
+            @close="showScanner = ''; focusBookInput()" />
+
+          <!-- Manual Input (alternatif) -->
+          <div class="manual-input-row">
+            <span class="manual-label">atau ketik manual:</span>
+            <input ref="bookBarcodeInput" v-model="pinjam.barcode" @keyup.enter="pinjamAddBook" type="text"
+              class="form-input flex-1" placeholder="Ketik kode barcode..." />
             <button @click="pinjamAddBook" :disabled="!pinjam.barcode || pinjam.bookLoading" class="btn btn-primary">
               <span v-if="pinjam.bookLoading" class="spinner"></span>
               <span v-else>+ Tambah</span>
             </button>
           </div>
 
-          <CameraScanner type="barcode" :active="showScanner === 'pinjam-barcode'"
-            @scanned="v => { pinjam.barcode = v; showScanner = ''; pinjamAddBook() }"
-            @close="showScanner = ''" />
-
+          <!-- Daftar buku yang sudah di-scan -->
           <div v-if="pinjam.books.length > 0" class="space-y-2">
             <div v-for="(bk, i) in pinjam.books" :key="i" class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
               <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-indigo-50">
@@ -83,6 +96,14 @@
               </button>
             </div>
           </div>
+
+          <!-- Tombol scan buku berikutnya (jika sudah ada buku) -->
+          <button v-if="pinjam.books.length > 0 && pinjam.books.length < pinjam.quota"
+            @click="openBookScanner"
+            class="btn btn-outline w-full justify-center gap-2">
+            📷 Scan Buku Berikutnya
+          </button>
+
           <div v-if="pinjam.bookError" class="p-3 rounded-xl text-sm text-red-600 bg-red-50 border border-red-200">⚠️ {{ pinjam.bookError }}</div>
         </div>
       </div>
@@ -119,14 +140,26 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, nextTick } from 'vue'
 import { router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/TailAdminLayout.vue'
 import CameraScanner from '@/Components/CameraScanner.vue'
 
 const showScanner = ref('')
+const bookBarcodeInput = ref(null)
+
 function toggleScanner(id) {
   showScanner.value = showScanner.value === id ? '' : id
+}
+
+function openBookScanner() {
+  showScanner.value = 'pinjam-barcode'
+}
+
+function focusBookInput() {
+  nextTick(() => {
+    if (bookBarcodeInput.value) bookBarcodeInput.value.focus()
+  })
 }
 
 const pinjam = reactive({
@@ -141,7 +174,12 @@ async function pinjamValidateMember() {
   pinjam.memberLoading = true; pinjam.memberError = ''; pinjam.member = null
   try {
     const res = await axios.post(route('loans.validate-member'), { member_code: pinjam.memberCode })
-    if (res.data.valid) { pinjam.member = res.data.member; pinjam.quota = res.data.quota ?? 2 }
+    if (res.data.valid) {
+      pinjam.member = res.data.member
+      pinjam.quota = res.data.quota ?? 2
+      // Otomatis buka kamera untuk scan buku setelah anggota tervalidasi
+      nextTick(() => { showScanner.value = 'pinjam-barcode' })
+    }
     else { pinjam.memberError = res.data.message }
   } catch (e) { pinjam.memberError = e.response?.data?.message || 'Terjadi kesalahan.' }
   finally { pinjam.memberLoading = false }
@@ -157,6 +195,7 @@ async function pinjamAddBook() {
       else { pinjam.books.push(res.data.copy) }
     } else { pinjam.bookError = res.data.message }
     pinjam.barcode = ''
+    focusBookInput()
   } catch (e) { pinjam.bookError = e.response?.data?.message || 'Buku tidak ditemukan.' }
   finally { pinjam.bookLoading = false }
 }
@@ -184,4 +223,55 @@ function pinjamSubmit() {
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Big scan button */
+.scan-btn-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 28px 20px;
+  border: 2px dashed #6366f1;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f0f1ff 0%, #fafafa 100%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.scan-btn-area:hover {
+  border-color: #4f46e5;
+  background: linear-gradient(135deg, #e0e3ff 0%, #f5f5ff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.15);
+}
+.scan-icon {
+  width: 72px; height: 72px;
+  border-radius: 20px;
+  background: #6366f1;
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+.scan-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #4f46e5;
+}
+.scan-sublabel {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* Manual input row */
+.manual-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.manual-label {
+  font-size: 12px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
 </style>

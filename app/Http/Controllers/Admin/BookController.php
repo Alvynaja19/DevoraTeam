@@ -91,6 +91,26 @@ class BookController extends Controller
         return response()->json($book);
     }
 
+    // Halaman cetak label barcode
+    public function printLabels(Request $request)
+    {
+        $search = $request->search;
+
+        $copies = BookCopy::with('book.category')
+            ->when($search, fn($q, $s) => $q->whereHas('book', fn($b) =>
+                $b->where('title', 'like', "%{$s}%")
+                  ->orWhere('author', 'like', "%{$s}%")
+            ))
+            ->orderBy('copy_code')
+            ->get();
+
+        return Inertia::render('Admin/Books/PrintLabels', [
+            'copies'  => $copies,
+            'search'  => $search,
+            'total'   => $copies->count(),
+        ]);
+    }
+
     public function update(Request $request, Book $book)
     {
         $data = $request->validate([

@@ -3,6 +3,12 @@
     <!-- Topbar actions -->
     <template #topbar-actions>
       <div class="flex items-center gap-3">
+        <Link :href="route('books.print-labels')" class="btn btn-outline gap-2">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.75 19.5m10.56-5.671.096-.001M17.25 19.5l-.441-5.672M3 8.25V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25M3 8.25h18M3 8.25a2.25 2.25 0 0 0-2.25 2.25v8.25A2.25 2.25 0 0 0 3 20.25h18a2.25 2.25 0 0 0 2.25-2.25v-8.25A2.25 2.25 0 0 0 21 8.25" />
+          </svg>
+          Cetak Label Barcode
+        </Link>
         <button @click="isImportModalOpen = true" class="btn btn-secondary">
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
           Import Excel

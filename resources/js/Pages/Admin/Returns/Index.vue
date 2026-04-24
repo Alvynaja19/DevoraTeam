@@ -5,25 +5,39 @@
       <!-- Scanner -->
       <div class="card">
         <div class="card-header">
-          <div class="font-semibold text-slate-800 dark:text-white">Scan Barcode Buku</div>
+          <div class="font-semibold text-slate-800 dark:text-white">Scan Barcode Buku yang Dikembalikan</div>
         </div>
-        <div class="card-body">
-          <form @submit.prevent="retur.result ? returProcess() : returCheckBook()" class="flex gap-2">
+        <div class="card-body space-y-4">
+
+          <!-- Big Camera Scan Button -->
+          <div v-if="!retur.result && !retur.fineResult && showScanner !== 'retur-barcode'"
+            class="scan-btn-area" @click="showScanner = 'retur-barcode'">
+            <div class="scan-icon">
+              <svg width="36" height="36" fill="none" viewBox="0 0 24 24">
+                <path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75V16.5ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75H13.5V13.5ZM13.5 18.75h.75v.75H13.5v-.75ZM18.75 13.5h.75v.75h-.75V13.5ZM18.75 18.75h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75V16.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="scan-label">Tap untuk Scan Barcode Buku</div>
+            <div class="scan-sublabel">Arahkan kamera ke barcode buku yang dikembalikan</div>
+          </div>
+
+          <!-- Camera Scanner -->
+          <CameraScanner type="barcode" :active="showScanner === 'retur-barcode'"
+            @scanned="v => { retur.barcode = v; showScanner = ''; returCheckBook() }"
+            @close="showScanner = ''; barcodeInput?.focus()" />
+
+          <!-- Manual Input (alternatif) -->
+          <form v-if="!retur.result && !retur.fineResult" @submit.prevent="retur.result ? returProcess() : returCheckBook()"
+            class="manual-input-row">
+            <span class="manual-label">atau ketik:</span>
             <input ref="barcodeInput" v-model="retur.barcode" type="text"
-              class="form-input flex-1 text-lg" placeholder="Scan barcode buku yang dikembalikan..." autofocus />
-            <button @click="toggleScanner('retur-barcode')" type="button" tabindex="-1"
-              :class="['btn', showScanner === 'retur-barcode' ? 'btn-secondary' : 'btn-outline']">
-              📷 {{ showScanner === 'retur-barcode' ? 'Tutup' : 'Kamera' }}
-            </button>
+              class="form-input flex-1" placeholder="Ketik kode barcode buku..." autofocus />
             <button type="submit" :disabled="!retur.barcode || retur.loading" class="btn btn-primary px-6">
               <span v-if="retur.loading" class="spinner"></span>
               <span v-else>Cek</span>
             </button>
           </form>
-
-          <CameraScanner type="barcode" :active="showScanner === 'retur-barcode'"
-            @scanned="v => { retur.barcode = v; showScanner = ''; barcodeInput?.focus(); returCheckBook() }"
-            @close="showScanner = ''; barcodeInput?.focus()" />
         </div>
       </div>
 
@@ -77,7 +91,7 @@
           <div v-else class="p-4 rounded-xl text-center bg-emerald-50 border border-emerald-200">
             <div class="text-green-600 font-semibold">✓ Pengembalian berhasil, tidak ada denda!</div>
           </div>
-          <button @click="returReset" class="btn btn-secondary w-full justify-center mt-4">Scan Buku Berikutnya</button>
+          <button @click="returReset" class="btn btn-secondary w-full justify-center mt-4">📷 Scan Buku Berikutnya</button>
         </div>
       </div>
     </div>
@@ -85,7 +99,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/TailAdminLayout.vue'
 import CameraScanner from '@/Components/CameraScanner.vue'
@@ -95,9 +109,6 @@ const notify = useNotificationStore()
 
 const barcodeInput = ref(null)
 const showScanner = ref('')
-function toggleScanner(id) {
-  showScanner.value = showScanner.value === id ? '' : id
-}
 
 const retur = reactive({
   barcode: '', result: null, fineResult: null,
@@ -111,6 +122,11 @@ const returConditions = [
   { value: 'hilang',       icon: '❌', label: 'Hilang' },
 ]
 
+// Auto-buka kamera saat halaman pertama dibuka
+onMounted(() => {
+  showScanner.value = 'retur-barcode'
+})
+
 async function returCheckBook() {
   if (!retur.barcode) return
   retur.loading = true; retur.result = null; retur.fineResult = null; retur.condition = ''
@@ -118,7 +134,7 @@ async function returCheckBook() {
     const res = await axios.post(route('returns.check'), { barcode: retur.barcode })
     if (res.data.on_loan) {
       retur.result = res.data
-      retur.condition = 'baik' // Auto-select condition 'baik' by default
+      retur.condition = 'baik'
     }
     else { notify.error(res.data.message || 'Buku tidak sedang dipinjam') }
   } catch (e) { notify.error(e.response?.data?.message || 'Buku tidak ditemukan.') }
@@ -131,23 +147,18 @@ async function returProcess() {
     const res = await axios.post(route('returns.store'), { barcode: retur.barcode, condition_after: retur.condition })
     retur.fineResult = res.data; retur.result = null
     notify.success('Pengembalian berhasil diproses!')
-    
-    // Auto refresh global data on standard inertia layout
     router.reload()
-
-    // Auto reset scanner form jika TIDAK ADA denda setelah 1.5 detik
     if (!res.data.fines || res.data.fines.length === 0) {
-      setTimeout(() => {
-        returReset()
-      }, 1500)
+      setTimeout(() => { returReset() }, 1500)
     }
   } catch (e) { notify.error(e.response?.data?.message || 'Gagal memproses pengembalian.') }
   finally { retur.processing = false }
 }
 
-function returReset() { 
-  retur.barcode = ''; retur.result = null; retur.fineResult = null; retur.condition = '' 
-  if (barcodeInput.value) barcodeInput.value.focus()
+function returReset() {
+  retur.barcode = ''; retur.result = null; retur.fineResult = null; retur.condition = ''
+  // Buka kamera lagi untuk scan buku berikutnya
+  showScanner.value = 'retur-barcode'
 }
 
 // ── Helpers ──
@@ -165,4 +176,55 @@ function formatRupiah(n) { return 'Rp ' + Number(n).toLocaleString('id-ID') }
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Big scan button */
+.scan-btn-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 36px 20px;
+  border: 2px dashed #6366f1;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f0f1ff 0%, #fafafa 100%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.scan-btn-area:hover {
+  border-color: #4f46e5;
+  background: linear-gradient(135deg, #e0e3ff 0%, #f5f5ff 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.15);
+}
+.scan-icon {
+  width: 80px; height: 80px;
+  border-radius: 20px;
+  background: #6366f1;
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+.scan-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #4f46e5;
+}
+.scan-sublabel {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* Manual input row */
+.manual-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.manual-label {
+  font-size: 12px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
 </style>
