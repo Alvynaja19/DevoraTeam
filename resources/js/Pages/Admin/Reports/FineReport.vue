@@ -36,7 +36,7 @@
           </div>
 
           <!-- Custom date pickers -->
-          <template v-if="filters.period === 'custom' || filters.period === 'hari'">
+          <template v-if="filters.period === 'custom'">
             <div class="flex items-center gap-2 ml-auto">
               <input type="date" v-model="filters.start_date"
                 class="px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500" />
@@ -242,7 +242,7 @@ const filters = reactive({
 
 function changePeriod(period) {
   filters.period = period
-  if (period !== 'custom' && period !== 'hari') {
+  if (period !== 'custom') {
     applyFilter()
   }
 }
