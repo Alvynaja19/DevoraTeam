@@ -264,6 +264,30 @@ body {
 .btn-warning  { background: #f79009; color: white; }
 .btn-warning:hover:not(:disabled)  { background: #dc6803; }
 
+.btn-outline {
+    background: transparent;
+    color: #344054;
+    border: 1px solid #d0d5dd;
+    box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+}
+.btn-outline:hover:not(:disabled) {
+    background: #f9fafb;
+    color: #1d2939;
+    border-color: #98a2b3;
+}
+
+/* Dark mode for btn-outline */
+.dark .btn-outline {
+    background: transparent;
+    color: #e2e8f0;
+    border-color: #475467;
+}
+.dark .btn-outline:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f1f5f9;
+    border-color: #667085;
+}
+
 .btn-sm { padding: 5px 10px; font-size: 13px; border-radius: 6px; }
 .btn-icon { padding: 8px; border-radius: 8px; }
 
