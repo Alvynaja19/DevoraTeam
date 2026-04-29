@@ -90,6 +90,13 @@ class ReportController extends Controller
             ->orderBy('visit_date')
             ->get();
 
+        // Create keyed map for faster lookup: date-category => count
+        $chartMap = [];
+        foreach ($chartRaw as $row) {
+            $key = $row->visit_date->format('Y-m-d') . '|' . $row->category;
+            $chartMap[$key] = $row->jumlah;
+        }
+
         // Build chart data with all dates in range
         $labels = [];
         $pengunjungData = [];
@@ -100,15 +107,12 @@ class ReportController extends Controller
             $dateStr = $current->format('Y-m-d');
             $labels[] = $current->format('d M');
 
-            $pengunjungData[] = $chartRaw
-                ->where('visit_date', $dateStr)
-                ->where('category', 'pengunjung')
-                ->first()?->jumlah ?? 0;
+            // Use keyed map for reliable lookup
+            $pengunjungKey = $dateStr . '|pengunjung';
+            $pembacaKey = $dateStr . '|membaca';
 
-            $pembacaData[] = $chartRaw
-                ->where('visit_date', $dateStr)
-                ->where('category', 'membaca')
-                ->first()?->jumlah ?? 0;
+            $pengunjungData[] = $chartMap[$pengunjungKey] ?? 0;
+            $pembacaData[] = $chartMap[$pembacaKey] ?? 0;
 
             $current->addDay();
         }
