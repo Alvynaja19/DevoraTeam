@@ -19,7 +19,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5Z"/>
           </svg>
         </div>
-        <span>Total <strong>{{ copies.length }}</strong> label siap cetak</span>
+        <span>Total <strong>{{ copies.length }}</strong> label dari <strong>{{ groupedBooks.length }}</strong> judul buku</span>
       </div>
       <div class="flex gap-3 w-full sm:w-auto">
         <div class="relative flex-1 sm:w-72">
@@ -42,34 +42,79 @@
       </svg>
       <div class="text-sm text-amber-800">
         <strong>Cara Print Label:</strong>
-        Klik tombol <strong>"Print Semua"</strong> di pojok kanan atas → browser akan buka dialog print →
-        pilih printer Anda → klik Print. Gunakan kertas <strong>stiker A4</strong> untuk hasil terbaik.
-        Setelah dicetak, gunting dan tempel di punggung buku fisik.
+        Gunakan <strong>"Print Semua"</strong> untuk cetak semua barcode sekaligus, atau klik
+        <strong>"Print Buku Ini"</strong> per judul buku, atau <strong>"Print"</strong> pada eksemplar tertentu.
+        Gunakan kertas <strong>stiker A4</strong> untuk hasil terbaik.
       </div>
     </div>
 
-    <!-- Grid Label -->
-    <div v-if="copies.length > 0" id="label-print-area" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-      <div v-for="copy in copies" :key="copy.id"
-        class="label-card bg-white border border-slate-200 rounded-xl p-3 flex flex-col items-center gap-1 shadow-sm hover:shadow-md transition-shadow">
-        <!-- Kode Buku -->
-        <div class="text-[10px] font-bold text-indigo-600 tracking-wide uppercase">{{ copy.copy_code }}</div>
-        <!-- Judul -->
-        <div class="text-[11px] font-semibold text-slate-700 text-center line-clamp-2 leading-tight" :title="copy.book?.title">
-          {{ copy.book?.title }}
+    <!-- Grouped by Book -->
+    <div v-if="groupedBooks.length > 0" id="label-print-area">
+      <div
+        v-for="group in groupedBooks"
+        :key="group.book_id"
+        class="book-group mb-8"
+      >
+        <!-- Book Group Header -->
+        <div class="book-group-header flex items-center justify-between mb-3 pb-2 border-b border-slate-200 no-print">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center flex-shrink-0">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#6366f1" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/>
+              </svg>
+            </div>
+            <div>
+              <span class="font-semibold text-slate-800 text-sm">{{ group.title }}</span>
+              <span class="text-slate-400 text-xs ml-2">{{ group.author }}</span>
+            </div>
+            <span class="ml-2 text-xs bg-indigo-100 text-indigo-600 font-semibold px-2 py-0.5 rounded-full">
+              {{ group.copies.length }} eksemplar
+            </span>
+          </div>
+          <!-- Tombol Print Per Buku -->
+          <button
+            @click="printBook(group)"
+            class="no-print flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:text-indigo-800 border border-indigo-200 transition-colors"
+          >
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.75 19.5m10.56-5.671.096-.001M17.25 19.5l-.441-5.672M3 8.25V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25M3 8.25h18M3 8.25a2.25 2.25 0 0 0-2.25 2.25v8.25A2.25 2.25 0 0 0 3 20.25h18a2.25 2.25 0 0 0 2.25-2.25v-8.25A2.25 2.25 0 0 0 21 8.25"/>
+            </svg>
+            Print Buku Ini ({{ group.copies.length }})
+          </button>
         </div>
-        <!-- Barcode -->
-        <div class="bg-white rounded py-1 px-0.5 w-full flex justify-center">
-          <svg class="barcode-svg" :data-copy-id="copy.id" :data-barcode="copy.barcode"
-            style="width:100%; max-height:50px;"></svg>
+
+        <!-- Print-only book title header (only shows when printing all) -->
+        <div class="book-group-print-header hidden">
+          <span>{{ group.title }}</span>
         </div>
-        <!-- Tombol Print Individual -->
-        <button @click="printOne(copy)" class="mt-1 text-[10px] text-indigo-500 hover:text-indigo-700 font-medium flex items-center gap-1 no-print">
-          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.75 19.5m10.56-5.671.096-.001M17.25 19.5l-.441-5.672M3 8.25V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25M3 8.25h18M3 8.25a2.25 2.25 0 0 0-2.25 2.25v8.25A2.25 2.25 0 0 0 3 20.25h18a2.25 2.25 0 0 0 2.25-2.25v-8.25A2.25 2.25 0 0 0 21 8.25"/>
-          </svg>
-          Print Label Ini
-        </button>
+
+        <!-- Copies Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          <div
+            v-for="copy in group.copies"
+            :key="copy.id"
+            class="label-card bg-white border border-slate-200 rounded-xl p-3 flex flex-col items-center gap-1 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <!-- Kode Buku -->
+            <div class="text-[10px] font-bold text-indigo-600 tracking-wide uppercase">{{ copy.copy_code }}</div>
+            <!-- Judul -->
+            <div class="text-[11px] font-semibold text-slate-700 text-center line-clamp-2 leading-tight" :title="copy.book?.title">
+              {{ copy.book?.title }}
+            </div>
+            <!-- Barcode -->
+            <div class="bg-white rounded py-1 px-0.5 w-full flex justify-center">
+              <svg class="barcode-svg" :data-copy-id="copy.id" :data-barcode="copy.barcode"
+                style="width:100%; max-height:50px;"></svg>
+            </div>
+            <!-- Tombol Print Individual -->
+            <button @click="printOne(copy)" class="mt-1 text-[10px] text-indigo-500 hover:text-indigo-700 font-medium flex items-center gap-1 no-print">
+              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.75 19.5m10.56-5.671.096-.001M17.25 19.5l-.441-5.672M3 8.25V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25M3 8.25h18M3 8.25a2.25 2.25 0 0 0-2.25 2.25v8.25A2.25 2.25 0 0 0 3 20.25h18a2.25 2.25 0 0 0 2.25-2.25v-8.25A2.25 2.25 0 0 0 21 8.25"/>
+              </svg>
+              Print
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -85,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { router } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/TailAdminLayout.vue'
 import JsBarcode from 'jsbarcode'
@@ -98,14 +143,32 @@ const props = defineProps({
 
 const searchInput = ref(props.search || '')
 
+// Group copies by book
+const groupedBooks = computed(() => {
+  const map = {}
+  props.copies.forEach(copy => {
+    const bookId = copy.book?.id ?? copy.book_id
+    if (!map[bookId]) {
+      map[bookId] = {
+        book_id: bookId,
+        title:   copy.book?.title   ?? '—',
+        author:  copy.book?.author  ?? '',
+        copies:  [],
+      }
+    }
+    map[bookId].copies.push(copy)
+  })
+  return Object.values(map)
+})
+
 // Render semua barcode setelah DOM siap
 onMounted(async () => {
   await nextTick()
   renderBarcodes()
 })
 
-function renderBarcodes() {
-  document.querySelectorAll('.barcode-svg').forEach(el => {
+function renderBarcodes(selector = '.barcode-svg') {
+  document.querySelectorAll(selector).forEach(el => {
     if (!el.dataset.barcode) return
     try {
       JsBarcode(el, el.dataset.barcode, {
@@ -142,14 +205,78 @@ function clearSearch() {
   })
 }
 
-// Print semua label
+// ── Print semua label ─────────────────────────────────────────────────────────
 function printAll() {
   window.print()
 }
 
-// Print satu label saja
+// ── Print semua eksemplar dari 1 buku ─────────────────────────────────────────
+function printBook(group) {
+  // Kumpulkan semua SVG barcode dari eksemplar buku ini
+  const labelsHtml = group.copies.map(copy => {
+    const svgEl = document.querySelector(`[data-copy-id="${copy.id}"].barcode-svg`)
+    const svgContent = svgEl ? svgEl.outerHTML : ''
+    return `
+      <div class="label">
+        <div class="code">${copy.copy_code}</div>
+        <div class="title">${copy.book?.title || ''}</div>
+        ${svgContent}
+      </div>`
+  }).join('')
+
+  const w = window.open('', '_blank', 'width=800,height=600')
+  w.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Label Buku: ${group.title}</title>
+      <style>
+        @page { size: A4; margin: 10mm; }
+        body {
+          margin: 0;
+          padding: 0;
+          font-family: Arial, sans-serif;
+        }
+        .book-title-header {
+          font-size: 12px;
+          font-weight: bold;
+          color: #4f46e5;
+          margin-bottom: 6mm;
+          padding-bottom: 2mm;
+          border-bottom: 1px solid #e0e0e0;
+        }
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 4mm;
+        }
+        .label {
+          border: 1px solid #ccc;
+          border-radius: 4mm;
+          padding: 3mm;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+        .code  { font-size: 9px; font-weight: bold; color: #4f46e5; letter-spacing: 0.5px; text-transform: uppercase; }
+        .title { font-size: 8px; font-weight: 600; color: #1e293b; text-align: center; margin: 2px 0; max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        svg    { width: 100%; height: auto; }
+      </style>
+    </head>
+    <body>
+      <div class="book-title-header">📚 ${group.title} — ${group.author} (${group.copies.length} eksemplar)</div>
+      <div class="grid">${labelsHtml}</div>
+      <script>window.onload = function() { window.print(); window.close(); }<\/script>
+    </body>
+    </html>
+  `)
+  w.document.close()
+}
+
+// ── Print 1 eksemplar saja ────────────────────────────────────────────────────
 function printOne(copy) {
-  // Buat konten SVG barcode untuk label yang dipilih
   const svgEl = document.querySelector(`[data-copy-id="${copy.id}"].barcode-svg`)
   const svgContent = svgEl ? svgEl.outerHTML : ''
 
@@ -190,12 +317,27 @@ function printOne(copy) {
   [class*="sidebar"], [class*="navbar"], [class*="topbar"],
   .no-print { display: none !important; }
 
-  /* Print area - grid label */
+  /* Print area — flat 4-column grid seperti semula */
   #label-print-area {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
     gap: 4mm !important;
     padding: 5mm !important;
+  }
+
+  /* Buat group wrapper & inner grid "transparan"
+     sehingga semua label-card mengalir ke grid induk */
+  .book-group {
+    display: contents !important;
+  }
+
+  .book-group .grid {
+    display: contents !important;
+  }
+
+  /* Sembunyikan header judul buku saat print all */
+  .book-group-print-header {
+    display: none !important;
   }
 
   .label-card {
