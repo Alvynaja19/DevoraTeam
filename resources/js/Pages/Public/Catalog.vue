@@ -108,7 +108,7 @@
 
           <!-- Grid -->
           <div v-if="books.data.length > 0" class="pub-books-grid">
-            <div v-for="book in books.data" :key="book.id" class="pub-book-card">
+            <div v-for="book in books.data" :key="book.id" class="pub-book-card" @click="openModal(book)">
               <!-- Cover -->
               <div class="pub-book-cover">
                 <img v-if="book.cover_image" 
@@ -121,6 +121,16 @@
                   </svg>
                 </div>
                 <span class="pub-cat-badge">{{ book.category }}</span>
+                <!-- Hover overlay -->
+                <div class="pub-book-overlay">
+                  <span class="pub-book-overlay-text">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:4px">
+                      <path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Lihat Detail
+                  </span>
+                </div>
               </div>
               <!-- Info -->
               <div class="pub-book-info">
@@ -136,8 +146,114 @@
             </div>
           </div>
 
+          <!-- ─── Book Detail Modal ────────────────────────────── -->
+          <Teleport to="body">
+            <Transition name="modal">
+              <div v-if="selectedBook" class="book-modal-backdrop" @click.self="closeModal">
+                <div class="book-modal">
+                  <!-- Close Button -->
+                  <button class="modal-close" @click="closeModal" aria-label="Tutup">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                      <path d="M6 18 18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </button>
+
+                  <div class="modal-inner">
+                    <!-- Left: Cover -->
+                    <div class="modal-cover-col">
+                      <div class="modal-cover-wrap">
+                        <img v-if="selectedBook.cover_image"
+                          :src="selectedBook.cover_image.startsWith('http') ? selectedBook.cover_image : '/' + selectedBook.cover_image"
+                          :alt="selectedBook.title" class="modal-cover-img" />
+                        <div v-else class="modal-cover-placeholder">
+                          <svg width="56" height="56" fill="none" viewBox="0 0 24 24">
+                            <path d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"
+                              stroke="#25a07e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <!-- Status badge -->
+                      <div class="modal-status-badge" :class="selectedBook.available_count > 0 ? 'status-avail' : 'status-borr'">
+                        <span class="status-dot"></span>
+                        {{ selectedBook.available_count > 0 ? 'Tersedia' : 'Sedang Dipinjam' }}
+                      </div>
+                      <div v-if="selectedBook.available_count > 0" class="modal-stock">
+                        {{ selectedBook.available_count }} eksemplar tersedia
+                      </div>
+                    </div>
+
+                    <!-- Right: Detail -->
+                    <div class="modal-detail-col">
+                      <!-- Category badge -->
+                      <span class="modal-cat-badge">{{ selectedBook.category }}</span>
+
+                      <!-- Title & Author -->
+                      <h2 class="modal-title">{{ selectedBook.title }}</h2>
+                      <p class="modal-author">{{ selectedBook.author }}</p>
+
+                      <!-- Metadata grid -->
+                      <div class="modal-meta-grid">
+                        <div v-if="selectedBook.publisher" class="meta-item">
+                          <span class="meta-label">Penerbit</span>
+                          <span class="meta-value">{{ selectedBook.publisher }}</span>
+                        </div>
+                        <div v-if="selectedBook.year" class="meta-item">
+                          <span class="meta-label">Tahun Terbit</span>
+                          <span class="meta-value">{{ selectedBook.year }}</span>
+                        </div>
+                        <div v-if="selectedBook.isbn" class="meta-item">
+                          <span class="meta-label">ISBN</span>
+                          <span class="meta-value">{{ selectedBook.isbn }}</span>
+                        </div>
+                        <div v-if="selectedBook.pages" class="meta-item">
+                          <span class="meta-label">Jumlah Halaman</span>
+                          <span class="meta-value">{{ selectedBook.pages }} halaman</span>
+                        </div>
+                        <div v-if="selectedBook.edition" class="meta-item">
+                          <span class="meta-label">Edisi</span>
+                          <span class="meta-value">{{ selectedBook.edition }}</span>
+                        </div>
+                        <div v-if="selectedBook.language" class="meta-item">
+                          <span class="meta-label">Bahasa</span>
+                          <span class="meta-value">{{ selectedBook.language }}</span>
+                        </div>
+                        <div v-if="selectedBook.city" class="meta-item">
+                          <span class="meta-label">Kota Terbit</span>
+                          <span class="meta-value">{{ selectedBook.city }}</span>
+                        </div>
+                        <div v-if="selectedBook.rack_number" class="meta-item">
+                          <span class="meta-label">Nomor Rak</span>
+                          <span class="meta-value">{{ selectedBook.rack_number }}</span>
+                        </div>
+                        <div v-if="selectedBook.total_loans" class="meta-item">
+                          <span class="meta-label">Total Dipinjam</span>
+                          <span class="meta-value">{{ selectedBook.total_loans }} kali</span>
+                        </div>
+                      </div>
+
+                      <!-- Divider -->
+                      <div class="modal-divider"></div>
+
+                      <!-- Synopsis / Description -->
+                      <div class="modal-synopsis-section">
+                        <h3 class="modal-synopsis-title">Sinopsis</h3>
+                        <p v-if="selectedBook.description" class="modal-synopsis-text">
+                          {{ selectedBook.description }}
+                        </p>
+                        <p v-else class="modal-synopsis-empty">
+                          Buku ini tidak memiliki sinopsis. Namun, dipastikan buku ini
+                          sangat menarik untuk dibaca dan menambah wawasan Anda di perpustakaan kami.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Transition>
+          </Teleport>
+
           <!-- Empty State -->
-          <div v-else class="pub-empty">
+          <div v-if="books.data.length === 0" class="pub-empty">
             <svg width="56" height="56" fill="none" viewBox="0 0 24 24">
               <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
                 stroke="#98a2b3" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -165,7 +281,7 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue'
+import { reactive, computed, ref } from 'vue'
 import { Link, router } from '@inertiajs/vue3'
 import PublicLayout from '@/Layouts/PublicLayout.vue'
 
@@ -207,6 +323,19 @@ function clearAll() {
 
 function getCategoryName(id) {
   return props.categories.find(c => String(c.id) === String(id))?.name || id
+}
+
+// ── Modal ────────────────────────────────────────────────────
+const selectedBook = ref(null)
+
+function openModal(book) {
+  selectedBook.value = book
+  document.body.style.overflow = 'hidden'
+}
+
+function closeModal() {
+  selectedBook.value = null
+  document.body.style.overflow = ''
 }
 </script>
 
@@ -464,11 +593,13 @@ function getCategoryName(id) {
   overflow: hidden;
   transition: transform 0.3s, box-shadow 0.3s;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  cursor: pointer;
 }
 
 .pub-book-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(45,158,100,0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(45,158,100,0.18);
+  border-color: #a8e8c4;
 }
 
 .pub-book-cover {
@@ -476,6 +607,30 @@ function getCategoryName(id) {
   background: #f0faf4;
   aspect-ratio: 4/3;
   overflow: hidden;
+}
+
+/* Hover overlay on cover */
+.pub-book-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(37, 160, 126, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  backdrop-filter: blur(2px);
+}
+
+.pub-book-card:hover .pub-book-overlay {
+  opacity: 1;
+}
+
+.pub-book-overlay-text {
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 .pub-book-img {
@@ -626,5 +781,244 @@ function getCategoryName(id) {
 .page-info {
   font-size: 14px;
   color: #667085;
+}
+
+/* ─── Book Detail Modal ──────────────────────────────────── */
+.book-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 30, 20, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.book-modal {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 780px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 36px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f2f4f7;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #667085;
+  transition: background 0.15s, color 0.15s;
+  z-index: 10;
+}
+
+.modal-close:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.modal-inner {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+/* Cover column */
+.modal-cover-col {
+  flex-shrink: 0;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-cover-wrap {
+  width: 180px;
+  height: 240px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+  border: 1px solid #e5e7eb;
+}
+
+.modal-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0faf4, #d8f3e3);
+}
+
+.modal-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  width: 100%;
+  justify-content: center;
+}
+
+.modal-status-badge.status-avail {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.modal-status-badge.status-borr {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+}
+
+.modal-stock {
+  font-size: 11px;
+  color: #667085;
+  text-align: center;
+}
+
+/* Detail column */
+.modal-detail-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-cat-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  background: #d8f3e3;
+  color: #1a6b5a;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 10px;
+}
+
+.modal-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #101828;
+  line-height: 1.3;
+  margin-bottom: 5px;
+}
+
+.modal-author {
+  font-size: 14px;
+  color: #667085;
+  margin-bottom: 18px;
+  font-style: italic;
+}
+
+.modal-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+  margin-bottom: 20px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.meta-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #98a2b3;
+}
+
+.meta-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #344054;
+}
+
+.modal-divider {
+  height: 1px;
+  background: #f2f4f7;
+  margin-bottom: 18px;
+}
+
+.modal-synopsis-section { }
+
+.modal-synopsis-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #344054;
+  margin-bottom: 10px;
+}
+
+.modal-synopsis-text {
+  font-size: 14px;
+  color: #475467;
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+.modal-synopsis-empty {
+  font-size: 14px;
+  color: #667085;
+  font-style: italic;
+  line-height: 1.7;
+}
+
+/* Transition */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.modal-enter-active .book-modal,
+.modal-leave-active .book-modal {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .book-modal,
+.modal-leave-to .book-modal {
+  transform: scale(0.95) translateY(16px);
+  opacity: 0;
 }
 </style>

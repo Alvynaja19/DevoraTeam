@@ -105,6 +105,12 @@ class PublicController extends Controller
                 'category'        => $b->category?->name,
                 'category_id'     => $b->category_id,
                 'available_count' => $b->available_count,
+                'isbn'            => $b->isbn,
+                'pages'           => $b->pages,
+                'edition'         => $b->edition,
+                'language'        => $b->language,
+                'city'            => $b->city,
+                'description'     => $b->description,
             ]);
 
         $categories = Category::withCount('books')

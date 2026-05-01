@@ -47,6 +47,51 @@
       </div>
     </div>
 
+    <!-- Chart Peminjaman -->
+    <div class="card mb-6">
+      <div class="card-header">
+        <div>
+          <div class="font-semibold text-slate-800 flex items-center gap-2">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" stroke="#2b5a41" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Tren Peminjaman
+          </div>
+          <div class="text-xs text-slate-400 mt-0.5">{{ chartPeriodLabel }}</div>
+        </div>
+        <div class="flex items-center gap-3">
+          <!-- Filter Tabs -->
+          <div class="chart-filter-tabs">
+            <button v-for="p in periods" :key="p.key"
+              @click="activePeriod = p.key; nextTick(drawChart)"
+              :class="['chart-filter-btn', activePeriod === p.key ? 'active' : '']">
+              {{ p.label }}
+            </button>
+          </div>
+          <div class="text-right">
+            <div class="text-sm font-semibold text-slate-800">{{ loanSummary.this_month }} <span class="text-xs font-normal text-slate-400">bulan ini</span></div>
+            <div class="flex items-center gap-1 justify-end">
+              <span v-if="monthTrend >= 0" class="text-xs text-emerald-600 font-medium">▲ {{ Math.abs(monthTrend) }}</span>
+              <span v-else class="text-xs text-red-500 font-medium">▼ {{ Math.abs(monthTrend) }}</span>
+              <span class="text-xs text-slate-400">vs bln lalu</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="px-5 pb-5 pt-2">
+        <!-- Tooltip -->
+        <div v-if="tooltip.visible" class="chart-tooltip" :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
+          <div class="font-semibold text-white">{{ tooltip.label }}</div>
+          <div class="text-emerald-300 text-sm">{{ tooltip.value }} transaksi</div>
+        </div>
+        <div class="chart-wrapper" ref="chartWrapper">
+          <canvas ref="chartCanvas" class="loan-chart" @mousemove="onChartHover" @mouseleave="tooltip.visible = false"></canvas>
+        </div>
+        <!-- X axis labels -->
+        <div class="flex justify-between mt-2 px-1">
+          <span v-for="(item, i) in xLabels" :key="i" class="text-[10px] text-slate-400">{{ item }}</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Bottom Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Recent Loans -->
@@ -120,7 +165,7 @@
                 <div class="text-[10px] text-slate-400">kali dipinjam</div>
               </div>
             </div>
-            
+
             <div v-if="popularBooks.length === 0" class="px-5 py-6 text-center text-sm text-slate-400">
               Belum ada peminjaman minggu ini.
             </div>
@@ -147,7 +192,6 @@
           </div>
         </div>
 
-
         <!-- Quick Actions -->
         <div class="card card-body">
           <div class="font-semibold text-slate-800 mb-3">Aksi Cepat</div>
@@ -172,6 +216,7 @@
 </template>
 
 <script setup>
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import AdminLayout from '@/Layouts/TailAdminLayout.vue'
 import LoanBadge from '@/Components/LoanBadge.vue'
 import { Link } from '@inertiajs/vue3'
@@ -181,8 +226,168 @@ const props = defineProps({
   recentLoans: Array,
   overdueLoans: Array,
   popularBooks: Array,
+  chartWeek:  Array,
+  chartMonth: Array,
+  chartYear:  Array,
+  loanSummary: Object,
 })
 
+// ── Chart ──────────────────────────────────────────────
+const chartCanvas = ref(null)
+const chartWrapper = ref(null)
+const tooltip = ref({ visible: false, x: 0, y: 0, label: '', value: 0 })
+let barRects = []
+
+const periods = [
+  { key: 'week',  label: 'Minggu' },
+  { key: 'month', label: 'Bulan'  },
+  { key: 'year',  label: 'Tahun'  },
+]
+const activePeriod = ref('month')
+
+const activeData = computed(() => {
+  if (activePeriod.value === 'week')  return props.chartWeek  ?? []
+  if (activePeriod.value === 'year')  return props.chartYear  ?? []
+  return props.chartMonth ?? []
+})
+
+const chartPeriodLabel = computed(() => {
+  if (activePeriod.value === 'week')  return '7 hari terakhir'
+  if (activePeriod.value === 'year')  return '12 bulan terakhir'
+  return '30 hari terakhir'
+})
+
+const maxVal = computed(() => Math.max(...activeData.value.map(d => d.total), 1))
+
+const xLabels = computed(() => {
+  const data = activeData.value
+  const step = Math.ceil(data.length / 6)
+  return data.filter((_, i) => i % step === 0 || i === data.length - 1).map(d => d.label)
+})
+
+const monthTrend = computed(() => (props.loanSummary?.this_month ?? 0) - (props.loanSummary?.last_month ?? 0))
+
+function drawChart() {
+  const canvas = chartCanvas.value
+  if (!canvas || !activeData.value.length) return
+
+  const wrapper = chartWrapper.value
+  canvas.width  = wrapper.clientWidth
+  canvas.height = 180
+
+  const ctx   = canvas.getContext('2d')
+  const data  = activeData.value
+  const W     = canvas.width
+  const H     = canvas.height
+  const padL  = 8
+  const padR  = 8
+  const padT  = 16
+  const padB  = 24
+  const chartW = W - padL - padR
+  const chartH = H - padT - padB
+  const max   = maxVal.value
+
+  ctx.clearRect(0, 0, W, H)
+  barRects = []
+
+  const n    = data.length
+  const gap  = 3
+  const barW = Math.max(4, (chartW - gap * (n - 1)) / n)
+
+  // Grid lines
+  const gridCount = 4
+  ctx.strokeStyle = '#f1f5f9'
+  ctx.lineWidth   = 1
+  for (let g = 0; g <= gridCount; g++) {
+    const y = padT + (chartH / gridCount) * g
+    ctx.beginPath()
+    ctx.moveTo(padL, y)
+    ctx.lineTo(W - padR, y)
+    ctx.stroke()
+  }
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, padT, 0, padT + chartH)
+  grad.addColorStop(0, 'rgba(43,90,65,0.85)')
+  grad.addColorStop(1, 'rgba(43,90,65,0.15)')
+
+  // Draw bars
+  data.forEach((item, i) => {
+    const barH = max > 0 ? (item.total / max) * chartH : 0
+    const x    = padL + i * (barW + gap)
+    const y    = padT + chartH - barH
+
+    // Rounded top bar
+    const r = Math.min(4, barW / 2, barH / 2)
+    ctx.fillStyle = grad
+    ctx.beginPath()
+    if (barH > 0) {
+      ctx.moveTo(x + r, y)
+      ctx.lineTo(x + barW - r, y)
+      ctx.arcTo(x + barW, y, x + barW, y + r, r)
+      ctx.lineTo(x + barW, y + barH)
+      ctx.lineTo(x, y + barH)
+      ctx.lineTo(x, y + r)
+      ctx.arcTo(x, y, x + r, y, r)
+      ctx.closePath()
+      ctx.fill()
+    }
+    barRects.push({ x, y, w: barW, h: barH, item })
+  })
+}
+
+function onChartHover(e) {
+  const canvas = chartCanvas.value
+  if (!canvas) return
+  const rect = canvas.getBoundingClientRect()
+  const mx = e.clientX - rect.left
+  const my = e.clientY - rect.top
+
+  let found = false
+  for (const bar of barRects) {
+    if (mx >= bar.x && mx <= bar.x + bar.w) {
+      tooltip.value = {
+        visible: true,
+        x: bar.x + bar.w / 2 - 48,
+        y: Math.max(0, bar.y - 52),
+        label: bar.item.label,
+        value: bar.item.total,
+      }
+      // Redraw dengan highlight
+      drawChart()
+      const ctx = canvas.getContext('2d')
+      ctx.fillStyle = 'rgba(43,90,65,1)'
+      const r = Math.min(4, bar.w / 2)
+      if (bar.h > 0) {
+        ctx.beginPath()
+        ctx.moveTo(bar.x + r, bar.y)
+        ctx.lineTo(bar.x + bar.w - r, bar.y)
+        ctx.arcTo(bar.x + bar.w, bar.y, bar.x + bar.w, bar.y + r, r)
+        ctx.lineTo(bar.x + bar.w, bar.y + bar.h)
+        ctx.lineTo(bar.x, bar.y + bar.h)
+        ctx.lineTo(bar.x, bar.y + r)
+        ctx.arcTo(bar.x, bar.y, bar.x + r, bar.y, r)
+        ctx.closePath()
+        ctx.fill()
+      }
+      found = true
+      break
+    }
+  }
+  if (!found) tooltip.value.visible = false
+}
+
+// Redraw saat filter berubah
+watch(activePeriod, () => nextTick(drawChart))
+
+onMounted(() => {
+  nextTick(() => {
+    drawChart()
+    window.addEventListener('resize', drawChart)
+  })
+})
+
+// ── Helpers ────────────────────────────────────────────
 function formatRupiah(n) {
   if (n >= 1000000) return 'Rp ' + (n / 1000000).toFixed(1) + 'jt'
   if (n >= 1000)    return 'Rp ' + (n / 1000).toFixed(0) + 'rb'
@@ -198,3 +403,55 @@ function isOverdue(loan) {
   return ['aktif', 'diperpanjang'].includes(loan.status) && new Date(loan.due_date) < new Date()
 }
 </script>
+
+<style scoped>
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+}
+.loan-chart {
+  display: block;
+  width: 100%;
+  cursor: crosshair;
+  border-radius: 8px;
+}
+.chart-tooltip {
+  position: absolute;
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 6px 12px;
+  pointer-events: none;
+  z-index: 10;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  font-size: 12px;
+}
+/* Filter tabs */
+.chart-filter-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 3px;
+}
+.chart-filter-btn {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.15s ease;
+}
+.chart-filter-btn:hover {
+  color: #2b5a41;
+}
+.chart-filter-btn.active {
+  background: #fff;
+  color: #2b5a41;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+</style>
