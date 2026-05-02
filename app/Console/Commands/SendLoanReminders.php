@@ -26,6 +26,9 @@ class SendLoanReminders extends Command
 
         $this->info("Checking {$activeItems->count()} active loan items...");
 
+        $dueTodayCount = 0;
+        $overdueCount = 0;
+
         foreach ($activeItems as $item) {
             $dueDate = $item->loan?->effectiveDueDate();
             if (!$dueDate) continue;
@@ -46,6 +49,7 @@ class SendLoanReminders extends Command
                     ['loan_id' => (string) $item->loan_id, 'days_left' => '1']
                 );
             } elseif ($diff === 0) {
+                $dueTodayCount++;
                 // H-0: hari pengembalian
                 $this->sendNotification(
                     $fcm, $member, $item, 'reminder_pengembalian',
@@ -54,6 +58,7 @@ class SendLoanReminders extends Command
                     ['loan_id' => (string) $item->loan_id, 'days_left' => '0']
                 );
             } elseif ($diff < 0) {
+                $overdueCount++;
                 // Sudah terlambat
                 $daysLate = abs($diff);
                 $this->sendNotification(
@@ -63,6 +68,20 @@ class SendLoanReminders extends Command
                     ['loan_id' => (string) $item->loan_id, 'days_late' => (string) $daysLate]
                 );
             }
+        }
+
+        // --- Kirim Notifikasi Rekap ke Admin ---
+        if ($dueTodayCount > 0 || $overdueCount > 0) {
+            $msgParts = [];
+            if ($dueTodayCount > 0) $msgParts[] = "$dueTodayCount buku jatuh tempo hari ini";
+            if ($overdueCount > 0) $msgParts[] = "$overdueCount buku telah terlambat";
+            
+            \App\Models\AdminNotification::create([
+                'type'    => 'peringatan_jatuh_tempo',
+                'title'   => 'Peringatan Jatuh Tempo',
+                'message' => 'Terdapat ' . implode(' dan ', $msgParts) . '. Silakan cek menu peminjaman.',
+                'url'     => route('loans.index'),
+            ]);
         }
 
         $this->info('Done sending loan reminders.');

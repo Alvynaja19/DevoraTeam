@@ -64,6 +64,15 @@ class MemberService
 
             $user->assignRole('anggota');
 
+            if ($isPending) {
+                \App\Models\AdminNotification::create([
+                    'type'    => 'pendaftaran_anggota',
+                    'title'   => 'Pendaftaran Anggota Baru',
+                    'message' => "Terdapat pendaftaran anggota baru atas nama {$data['name']} yang menunggu persetujuan.",
+                    'url'     => route('members.index', ['type' => 'umum']),
+                ]);
+            }
+
             return $member;
         });
     }
@@ -109,6 +118,10 @@ class MemberService
             'expired_at'  => now()->addYear(),
         ]);
 
+        \App\Models\AdminNotification::where('type', 'pendaftaran_anggota')
+            ->where('message', 'like', "%{$member->name}%")
+            ->update(['is_read' => true]);
+
         return $member;
     }
 
@@ -123,6 +136,10 @@ class MemberService
             'verified_by'      => $rejectedBy->id,
             'verified_at'      => now(),
         ]);
+
+        \App\Models\AdminNotification::where('type', 'pendaftaran_anggota')
+            ->where('message', 'like', "%{$member->name}%")
+            ->update(['is_read' => true]);
 
         return $member;
     }

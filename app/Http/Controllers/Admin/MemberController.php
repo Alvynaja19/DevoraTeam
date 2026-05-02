@@ -78,6 +78,11 @@ class MemberController extends Controller
         }
 
         $name = $member->name;
+        
+        \App\Models\AdminNotification::where('type', 'pendaftaran_anggota')
+            ->where('message', 'like', "%{$name}%")
+            ->update(['is_read' => true]);
+
         $member->delete();
 
         return back()->with('success', "Anggota {$name} berhasil dihapus.");

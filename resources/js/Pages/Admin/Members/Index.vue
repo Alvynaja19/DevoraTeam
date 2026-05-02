@@ -148,7 +148,7 @@
                 <button @click="openDetailModal(m)" class="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 font-medium">Detail</button>
                 <button @click="openEditModal(m)" class="px-3 py-1 text-sm text-amber-600 hover:text-amber-700 font-medium">Edit</button>
                 <button @click="confirmDelete(m)" class="px-3 py-1 text-sm text-red-600 hover:text-red-700 font-medium">Hapus</button>
-                <button v-if="m.status === 'pending'" @click="approve(m)" class="px-3 py-1 text-sm text-emerald-600 hover:text-emerald-700 font-medium">Setujui</button>
+                <button v-if="m.status === 'pending'" @click="confirmApprove(m)" class="px-3 py-1 text-sm text-emerald-600 hover:text-emerald-700 font-medium">Setujui</button>
               </div>
             </td>
           </tr>
@@ -486,6 +486,28 @@
         </div>
       </div>
     </div>
+
+    <!-- ══════ MODAL: Setujui Anggota ══════ -->
+    <div v-if="approveTarget" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" @click.self="approveTarget = null">
+      <div class="bg-white rounded-2xl w-full max-w-sm p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#059669" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-900">Setujui Anggota</h3>
+            <p class="text-sm text-gray-500">Anggota ini akan diberi akses ke sistem.</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-600 mb-5">
+          Yakin ingin menyetujui pendaftaran <strong>"{{ approveTarget.name }}"</strong>?
+        </p>
+        <div class="flex justify-end gap-3">
+          <button @click="approveTarget = null" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg text-sm transition">Batal</button>
+          <button @click="doApprove" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm transition">Ya, Setujui</button>
+        </div>
+      </div>
+    </div>
   </AdminLayout>
 </template>
 
@@ -669,10 +691,12 @@ function submitImport() {
 }
 
 // ── Actions ──
-function approve(member) {
-  if (confirm(`Setujui anggota ${member.name}?`)) {
-    router.post(route('members.approve', member.id))
-  }
+const approveTarget = ref(null)
+function confirmApprove(member) { approveTarget.value = member }
+function doApprove() {
+  router.post(route('members.approve', approveTarget.value.id), {}, {
+    onSuccess: () => { approveTarget.value = null },
+  })
 }
 
 function formatDate(d) {

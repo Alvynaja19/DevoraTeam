@@ -134,7 +134,7 @@ const markAllAsRead = () => {
 }
 
 const handleNotificationClick = (notif) => {
-  if (!notif.is_read) {
+  if (!notif.is_read && notif.type !== 'pendaftaran_anggota') {
     markAsRead(notif.id)
   }
   

@@ -8,6 +8,7 @@ use App\Models\Loan;
 use App\Models\Fine;
 use App\Models\Visit;
 use App\Models\Book;
+use App\Models\BookCopy;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -63,76 +64,91 @@ class DashboardController extends Controller
             return $book;
         });
 
-        // ── Chart data ─────────────────────────────────────────
-        // Per Minggu: 7 hari terakhir, per hari
-        $weekStart = now()->subDays(6)->startOfDay();
-        $rawWeek = Loan::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
-            ->where('created_at', '>=', $weekStart)
+        // ── Chart data ─────────────────────────────────────────────────
+        // Hari dalam bulan ini (1 s/d hari ini)
+        $daysInThisMonth = now()->day;
+        $thisMonthStart  = now()->startOfMonth();
+
+        $rawThisMonth = Loan::select(DB::raw('DAY(created_at) as day'), DB::raw('COUNT(*) as total'))
+            ->whereBetween('created_at', [$thisMonthStart, now()->endOfDay()])
+            ->groupBy(DB::raw('DAY(created_at)'))
+            ->get()->keyBy('day');
+
+        // Hari dalam bulan lalu (1 s/d hari yg sama di bulan lalu)
+        $lastMonthStart = now()->subMonth()->startOfMonth();
+        $lastMonthEnd   = now()->subMonth()->setDay($daysInThisMonth)->endOfDay();
+
+        $rawLastMonth = Loan::select(DB::raw('DAY(created_at) as day'), DB::raw('COUNT(*) as total'))
+            ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
+            ->groupBy(DB::raw('DAY(created_at)'))
+            ->get()->keyBy('day');
+
+        $chartDays = [];
+        for ($d = 1; $d <= $daysInThisMonth; $d++) {
+            $chartDays[] = [
+                'label'      => $d,
+                'this_month' => (int)($rawThisMonth[$d]->total ?? 0),
+                'last_month' => (int)($rawLastMonth[$d]->total ?? 0),
+            ];
+        }
+
+        // Minggu ini vs minggu lalu (per hari, 7 hari)
+        $rawThisWeek = Loan::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
+            ->where('created_at', '>=', now()->subDays(6)->startOfDay())
             ->groupBy(DB::raw('DATE(created_at)'))
             ->get()->keyBy('date');
 
-        $chartWeek = [];
+        $rawLastWeek = Loan::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
+            ->whereBetween('created_at', [now()->subDays(13)->startOfDay(), now()->subDays(7)->endOfDay()])
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->get()->keyBy('date');
+
+        $chartWeekCompare = [];
         for ($i = 6; $i >= 0; $i--) {
-            $day = now()->subDays($i)->format('Y-m-d');
-            $chartWeek[] = [
-                'label' => now()->subDays($i)->locale('id')->isoFormat('ddd, D MMM'),
-                'total' => $rawWeek->has($day) ? (int)$rawWeek[$day]->total : 0,
+            $thisDay = now()->subDays($i)->format('Y-m-d');
+            $lastDay = now()->subDays($i + 7)->format('Y-m-d');
+            $chartWeekCompare[] = [
+                'label'      => now()->subDays($i)->locale('id')->isoFormat('ddd D/M'),
+                'this_month' => (int)($rawThisWeek[$thisDay]->total ?? 0),
+                'last_month' => (int)($rawLastWeek[$lastDay]->total ?? 0),
             ];
         }
 
-        // Per Bulan: 30 hari terakhir, per hari
-        $monthStart = now()->subDays(29)->startOfDay();
-        $rawMonth = Loan::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
-            ->where('created_at', '>=', $monthStart)
-            ->groupBy(DB::raw('DATE(created_at)'))
-            ->get()->keyBy('date');
-
-        $chartMonth = [];
-        for ($i = 29; $i >= 0; $i--) {
-            $day = now()->subDays($i)->format('Y-m-d');
-            $chartMonth[] = [
-                'label' => now()->subDays($i)->locale('id')->isoFormat('D MMM'),
-                'total' => $rawMonth->has($day) ? (int)$rawMonth[$day]->total : 0,
-            ];
-        }
-
-        // Per Tahun: 12 bulan terakhir, per bulan
-        $yearStart = now()->subMonths(11)->startOfMonth();
+        // 12 bulan terakhir vs 12 bulan sebelumnya (per bulan)
         $rawYear = Loan::select(
                 DB::raw('YEAR(created_at) as year'),
                 DB::raw('MONTH(created_at) as month'),
                 DB::raw('COUNT(*) as total')
             )
-            ->where('created_at', '>=', $yearStart)
+            ->where('created_at', '>=', now()->subMonths(23)->startOfMonth())
             ->groupBy(DB::raw('YEAR(created_at)'), DB::raw('MONTH(created_at)'))
             ->get()
             ->keyBy(fn($r) => $r->year . '-' . str_pad($r->month, 2, '0', STR_PAD_LEFT));
 
-        $chartYear = [];
+        $chartYearCompare = [];
         for ($i = 11; $i >= 0; $i--) {
-            $m   = now()->subMonths($i);
-            $key = $m->format('Y-m');
-            $chartYear[] = [
-                'label' => $m->locale('id')->isoFormat('MMM YY'),
-                'total' => $rawYear->has($key) ? (int)$rawYear[$key]->total : 0,
+            $m    = now()->subMonths($i);
+            $mPrev = now()->subMonths($i + 12);
+            $chartYearCompare[] = [
+                'label'      => $m->locale('id')->isoFormat('MMM YY'),
+                'this_month' => (int)($rawYear[$m->format('Y-m')]->total ?? 0),
+                'last_month' => (int)($rawYear[$mPrev->format('Y-m')]->total ?? 0),
             ];
         }
 
         // Summary bulan ini vs bulan lalu
-        $thisMonth = Loan::whereYear('created_at', now()->year)
-            ->whereMonth('created_at', now()->month)->count();
-        $lastMonth = Loan::whereYear('created_at', now()->subMonth()->year)
-            ->whereMonth('created_at', now()->subMonth()->month)->count();
+        $thisMonthTotal = (int)array_sum(array_column($chartDays, 'this_month'));
+        $lastMonthTotal = (int)array_sum(array_column($chartDays, 'last_month'));
 
         return Inertia::render('Admin/Dashboard', [
-            'stats'        => $stats,
-            'recentLoans'  => $recentLoans,
-            'overdueLoans' => $overdueLoans,
-            'popularBooks' => $popularBooks,
-            'chartWeek'    => $chartWeek,
-            'chartMonth'   => $chartMonth,
-            'chartYear'    => $chartYear,
-            'loanSummary'  => ['this_month' => $thisMonth, 'last_month' => $lastMonth],
+            'stats'              => $stats,
+            'recentLoans'        => $recentLoans,
+            'overdueLoans'       => $overdueLoans,
+            'popularBooks'       => $popularBooks,
+            'chartDays'          => $chartDays,
+            'chartWeekCompare'   => $chartWeekCompare,
+            'chartYearCompare'   => $chartYearCompare,
+            'loanSummary'        => ['this_month' => $thisMonthTotal, 'last_month' => $lastMonthTotal],
         ]);
     }
 }

@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title inertia>{{ config('app.name', 'SMA NEGERI 4 JEMBER') }}</title>
-
+        <link rel="icon" type="image/png" href="{{ asset('images/logo-sman4-jember.png') }}">
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
